@@ -1,4 +1,4 @@
-﻿//v1.5 master 0073
+﻿//v1.5 GM 0073
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -9,6 +9,8 @@
 // UPDATE INFO http://web.me.com/t_trace/pbtweet.html
 
 ( function(){
+
+var isOpera = !!this.opera, isFirefox = !!this.Components, isChromium = !!this.contentWindow , isSafari = this.getMatchedCSSRules && !isChromium;
 
 // initialize pbtweet if pbtweet not works.
 if(!document.getElementById('pb_info'))
@@ -23,13 +25,13 @@ else
 // initialize pbtweet//
 function pb_init()
 {
-	setTimeout( pb_css_set() , 1 );
+	pb_css_set();
 	conv_chain_hash = new Array(0);
 	session_id = document.getElementsByName('session-user-screen_name')[0].content;
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 master 0073";
+	pb_version = "v1.5 GM 0073";
 	pb_active_group = null;
 
 	//preference values
@@ -129,7 +131,7 @@ function pb_init()
 	pb_info_panel();
 	if(document.getElementById('side'))
 	{
-		pb_group_tab();
+		//pb_group_tab();
 		remove_accesskey();
 	}
 	
@@ -365,7 +367,7 @@ function pbtweet_main(target)
 					var my_node = entry[i].id;
 					// delaying //
 					if(hasClass(entry[i],"animate")){
-						setTimeout(pbtweet_main([entry[i]]), 1000);
+						//setTimeout(pbtweet_main([entry[i]]), 1000);
 					} else {
 						document.getElementById(my_node).addEventListener("DOMNodeInserted", function(event){if(hasClass(event.target, "conv_chain")){kick_animation(event.target)}}, false);
 						retreve_data(get_url,my_node, repeat_count );
@@ -401,7 +403,7 @@ function pbtweet_main(target)
 			}
 			catch(err)
 			{
-				window.console.log = window.console.log + err.message;
+				//window.console.log = window.console.log + err.message;
 			}
 	}
 }
@@ -934,7 +936,7 @@ function insert_update()
 				
 				//update status text
 				if(insert_point_id < updated_entry_id && hasClass(updated_entry,"mine") && (insert_point.id != "timeline") && (document.body.id != "profile")){
-					document.getElementsByClassName("status-text")[0].innerText = updated_entry.getElementsByClassName("entry-content")[0].innerText;
+					document.getElementsByClassName("status-text")[0].textContent = updated_entry.getElementsByClassName("entry-content")[0].textContent;
 				}
 				
 				//alert(insert_point_id);
@@ -956,12 +958,18 @@ function insert_update()
 					} catch(err){
 					}
 					//update animation
-					addClass(updated_entry,"animate");
+					//addClass(updated_entry,"animate");
 					
-					if( insert_point.id != "timeline" )
-					{
-						updated_entry.style.opacity = "0";
-						updated_entry.style.marginTop = "-54px";
+					if(insert_point.id != "timeline"){
+						// add animation
+						//var conv_script = document.createElement('script');
+						//conv_script.innerHTML = "setTimeout(function(){document.getElementById('" + updated_entry.id + "').style.opacity = '1';document.getElementById('" + updated_entry.id + "').style.marginTop = '0px';}," + (i * 200 + 10) + ")";
+						//updated_entry.style.opacity = "0";
+						//updated_entry.style.marginTop = "-" + updated_entry.clientHeight + "px";
+						//updated_entry.style.marginTop = "-52px";
+						//updated_entry.style.webkitTransition = "opacity 0.35s cubic-bezier(0.4, 0.0, 0.6, 0.4), margin-top 0.2s ease-in";
+						//updated_entry.style.webkitTransition = "opacity 0.35s cubic-bezier(0.4, 0.0, 0.6, 0.4);";
+						//updated_entry.appendChild(conv_script);
 						insert_point.parentNode.insertBefore(updated_entry, insert_point);
 
 						// latest status class change.
@@ -969,7 +977,7 @@ function insert_update()
 						{
 							insert_point.className = insert_point.className.replace(/latest\-status/g,"");
 						}
-						setTimeout(update_notification(updated_entry), 10);
+						update_notification(updated_entry);
 
 						//update latest_mention_id
 						if( !active_timeline_url.match( /replies/ ) )
@@ -978,7 +986,7 @@ function insert_update()
 							set_storage_Value( 'pb_latest_mention_id' , latest_mention_id );
 						}
 		
-						pb_latest_update = Date();
+						//pb_latest_update = Date();
 						
 					}
 					else
@@ -1068,10 +1076,10 @@ function check_inbox( type )
 				var message_id = messages[i].id.match( regex_for_id )[1];
 				if(latest_value < message_id && latest_value != 0 && init_inbox == '')
 				{
-					var message_sender = inbox_checker_container.getElementsByClassName('screen-name')[i].innerText;
+					var message_sender = inbox_checker_container.getElementsByClassName('screen-name')[i].textContent;
 					var growl_message = {
 						title : message_sender ,
-						description : inbox_checker_container.getElementsByClassName('entry-content')[i].innerText ,
+						description : inbox_checker_container.getElementsByClassName('entry-content')[i].textContent ,
 						priority: message_priority ,
 						identifier: inbox_checker_container.getElementsByClassName('hentry')[i].id ,
 						icon : inbox_checker_container.getElementsByClassName('photo')[i].src ,
@@ -1215,7 +1223,7 @@ function pb_link_remover(target)
 	{
 		try
 		{ //possible when real-url is exist.
-			if( pb_link[i].innerText == '@' )
+			if( pb_link[i].textContent == '@' )
 			{	// in order to remove search tab
 				var atmark_span = document.createElement('span');
 				atmark_span.innerHTML = '@' ;
@@ -1224,17 +1232,17 @@ function pb_link_remover(target)
 			}
 			if(!(hasClass(pb_link[i],'hashtag') || hasClass(pb_link[i],'sname') || pb_link[i].target != "_blank"))
 			{
-					pb_link[i].innerText = pb_link[i].href;
+					pb_link[i].textContent = pb_link[i].href;
 			}
 		} catch(err) {}
 	}
-	removed_str = pb_temp_target.innerText;
+	removed_str = pb_temp_target.textContent;
 	return removed_str;
 }
 
 function pb_snip_expander( target )
 {
-	var url_alias = target.getElementsByTagName('span')[0].name;
+	var url_alias = target.href;
 //	var snip_pattern = /http\:\/\/bit\.ly\/.+|http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
 	var snip_pattern = /http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
 	var bitly_pattern = /http\:\/\/(bit\.ly|j\.mp)\/[a-zA-Z0-9]+/;
@@ -1299,20 +1307,20 @@ function kick_animation(target)
 			target.style.opacity = "0";
 			target.style.webkitTransition = "opacity 0.45s cubic-bezier(0.4, 0.0, 0.6, 0.4), margin-top 0.35s ease-out";
 			var conv_script = document.createElement('script');
-			conv_script.innerHTML = "setTimeout(function(){document.getElementById('" + target.id + "').style.opacity = '1';document.getElementById('" + target.id + "').style.marginTop = '5px';},200)";
+			conv_script.innerHTML = "setTimeout(function(){document.getElementById('" + target.id + "').style.opacity = '1';document.getElementById('" + target.id + "').style.marginTop = '6px';},200)";
 			target.appendChild(conv_script);
 		}
 		else
 		{
 			target.style.opacity = "1";
-			target.style.marginTop = "5px";
+			target.style.marginTop = "6px";
 		}
 	}
 	else
 	{
 		//alert('end');
 		target.style.opacity = "1";
-		target.style.marginTop = "5px";
+		target.style.marginTop = "6px";
 	}
 }
 
@@ -1326,8 +1334,7 @@ function kick_animation_on_top(e)
 		window.scrollTo(curr_scroll_x, (curr_scroll_y + 52));
 		target.style.opacity = "1";
 		target.style.marginTop = "0px";
-		target.style.webkitTransition = "";
-		removeClass(target, "animate");
+		//removeClass(target, "animate");
 		pbtweet_main([target]);
 	}
 	else
@@ -1398,7 +1405,7 @@ function pb_appearance_set(target)
 	} else {
 		var style_target = content_target;
 	}
-	var entry_string = content_target.getElementsByClassName('entry-content')[0].innerText;
+	var entry_string = content_target.getElementsByClassName('entry-content')[0].textContent;
 	var mention_regex = new RegExp("@" + session_id);
 	if(entry_string.match(mention_regex) && (!hasClass(style_target, 'mine'))){
 		addClass(style_target, "pb-mention");
@@ -1420,14 +1427,14 @@ function pb_translate(event)
 	{
 		for(var i = 0;  i < string_container.getElementsByClassName('pb-real-url').length; i++)
 		{
-			string_container.getElementsByClassName('pb-real-url')[i].innerText = '';
+			string_container.getElementsByClassName('pb-real-url')[i].textContent = '';
 		}
 	}
-	var original_string = string_container.innerText;
+	var original_string = string_container.textContent;
 	if(!hasClass(target_container.parentNode,'entry-baloon')){
 		if(target_container.parentNode.getElementsByTagName('strong')[0])
 		{
-			var tweeter_name = target_container.parentNode.getElementsByTagName('strong')[0].innerText;
+			var tweeter_name = target_container.parentNode.getElementsByTagName('strong')[0].textContent;
 		}
 		else
 		{
@@ -1673,11 +1680,11 @@ function update_notification(updated_entry)
 		var author = updated_entry.getElementsByClassName("screen-name")[0].title;
 		var avatar = updated_entry.getElementsByClassName("photo")[0].src;
 	} else {
-		var author = document.getElementById('profile').getElementsByClassName("fn")[0].innerText;
+		var author = document.getElementById('profile').getElementsByClassName("fn")[0].textContent;
 		var avatar = document.getElementById('profile-image').src;
 	}
 	
-	var tweet = updated_entry.getElementsByClassName("entry-content")[0].innerText;
+	var tweet = updated_entry.getElementsByClassName("entry-content")[0].textContent;
 	var messages = {
 		title: author,
 		description: tweet,
@@ -1765,7 +1772,7 @@ Notifire.prototype =
 	
 	set description ( x )
 	{
-		this.description_container.innerText = x;
+		this.description_container.textContent = x;
 	} ,
 
 	get priority ()
@@ -2075,20 +2082,31 @@ function pb_info_panel()
 	
 	var pb_panel = document.createElement('div');
 	pb_panel.id = 'pb_panel';
-	pb_panel.innerHTML = pbtweet_icon + '<br><br>version: ' + pb_version + '<br><form>translate to: '+ lang_menu + '<br>max conversation: ' + chonv_count_menu + '<br>' + accesskey_enablity + '</form><br><a href="http://web.me.com/t_trace/pbtweet/pbtweet_dev.user.js" target="_blank">update to latest version</a><br><img src="http://search.twitter.com/images/powered-by-twitter-sig.gif?1220915084"><br>Powerd by Yahoo! Pipes<br>Powerd by Google<br><input type="button" value="close">';
-	
+	pb_panel.innerHTML = pbtweet_icon + '<br><br>version: ' + pb_version + '<br><form>translate to: '+ lang_menu + '<br>max conversation: ' + chonv_count_menu + '<br>' + accesskey_enablity + '</form><br><a href="http://web.me.com/t_trace/pbtweet/pbtweet_dev_FF.user.js" target="_blank">update to latest version</a><br><img src="http://search.twitter.com/images/powered-by-twitter-sig.gif?1220915084"><br>Powerd by Yahoo! Pipes<br>Powerd by Google<br><input type="button" value="close">';
+	pb_panel.style.display = 'none';
 	pb_nav.appendChild(pb_panel);
 	
-	pb_nav.addEventListener('click', function(e){pb_panel.style.webkitTransform="scale(1, 1)";pb_panel.style.opacity = "1";e.preventDefault();},false);
+	pb_nav.addEventListener('click', function(e){show_close_panel(e.target, pb_panel);e.preventDefault();},false);
 	pb_nav.getElementsByTagName('a')[1].addEventListener('click', function(e){e.stopPropagation();},false);
 	pb_nav.getElementsByTagName('select')[0].addEventListener('change', function(e){pb_changelang(e);},true);
 	pb_nav.getElementsByTagName('select')[1].addEventListener('change', function(e){chain_count = e.target.value; set_storage_Value( 'pb_chain_count' , chain_count ) ; } , true );
-	pb_panel.getElementsByTagName('input')[0].addEventListener('click', function(e){pb_panel.style.opacity = "0";pb_panel.style.webkitTransform = "scale(0.2, 0)";e.preventDefault();e.stopPropagation()},true);
+//	pb_panel.getElementsByTagName('input')[0].addEventListener('click', function(e){pb_panel.style.display = 'none';e.preventDefault();e.stopPropagation()},true);
 
 	menu_init(pb_nav.getElementsByTagName('select')[0] , pb_lang );
 	menu_init(pb_nav.getElementsByTagName('select')[1] , chain_count );
 	
 	document.getElementById('header').getElementsByTagName('ul')[0].insertBefore(pb_nav, document.getElementById('header').getElementsByTagName('li')[5]);
+//	document.getElementById('navigation').getElementsByTagName('ul')[0].insertBefore(pb_nav, document.getElementById('navigation').getElementsByTagName('ul')[0].getElementsByClassName('last')[0]);
+}
+
+function show_close_panel(obj, pb_panel)
+{
+	if(obj.type == 'button')
+	{
+		pb_panel.style.display = 'none';
+	} else {
+		pb_panel.style.display = 'block';
+	}
 }
 
 function menu_init(target, value)
@@ -2126,7 +2144,7 @@ function restore_pb_values()
 	unread_inbox = get_storage_Value('pb_unread_inbox') ? get_storage_Value('pb_unread_inbox') : 0;
 	unread_mentions = get_storage_Value('pb_unread_mentions') ? get_storage_Value('pb_unread_mentions') : 0;
 
-	window.onbeforeunload = function ()
+	window.onclose = function ()
 	{
 		return save_storage_Changes();
 	};
@@ -2203,110 +2221,115 @@ function is_localstorage()
 	}
 	else
 	{
-		return(true);
+		return(false);
 	}
 }
 
-function load_localscript()
+function load_localscript(event)
 {
-	var global_functions = document.createElement('script');
-	global_functions.src = "http://web.me.com/t_trace/pbtweet/pbtweet_global_dev.js";
-	document.getElementsByTagName("head")[0].appendChild(global_functions);
+	if(!pb_accept_local_functions)
+	{
+		var global_functions = document.createElement('script');
+		global_functions.src = "http://web.me.com/t_trace/pbtweet/pbtweet_global_dev.js";
+		document.getElementsByTagName("head")[0].appendChild(global_functions);
+		pb_accept_local_functions = true;
+		pb_translate(event);
+	}
 }
 
 function pb_css_set()
 {
 	var insert_HTML = '';
 	var get_url = '';
-	var oLength = document.styleSheets[0].cssRules.length;
-	document.styleSheets[0].insertRule('div.conv_chain {clear:both; text-align:left;margin: 5px 5px 4px 0px; padding:0px 0px 0px 0px;}',oLength);
-	document.styleSheets[0].insertRule('div.conv_chain div.thumb{width: 34px !important; height: 34px !important; position:relative !important;max-width:100px;}',oLength+1);
-	document.styleSheets[0].insertRule('div.conv_chain div.thumb img{vertical-align:top; margin-right:4px !important;width:60px !important;max-width:60px !important;height:32px !important;}',oLength+2);
-	document.styleSheets[0].insertRule('div.conv_chain span.icons{display:inline-block;margin-left:15px;text-align:center;padding:0px 0px 10px 0px;width:50px !important;max-width:50px !important;}',oLength+3);
-	document.styleSheets[0].insertRule('div.conv_chain span.icons img{max-width:40px;max-height:40px;}',oLength+4);
-	document.styleSheets[0].insertRule('div.conv_chain span.icons a:hover {text-underline: none;}',oLength+5);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content, body#show #content div.conv_chain span.entry-content{display:block;width:400px;max-width:400px;min-height:24px;margin:0px 0px 0px 0px;padding:0px 12px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_02.png); background-repeat:repeat-y;}',oLength+6);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content-before{display:block;width:400px;max-width:400px; height:12px;margin:0px 0px 0px 0px;padding:0px 6px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_01.png); background-repeat:no-repeat;}',oLength+7);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content-after {display:block;width:400px;max-width:400px; height:25px;margin:0px 0px -10px 0px;padding:0px 6px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_03.png); background-repeat:no-repeat; background-position:0px -4px;}',oLength+8);
-	document.styleSheets[0].insertRule('div.conv_chain span.meta.entry-meta {clear:right; display:block;padding-left:24px; height:10px; margin-top:4px}',oLength+9);
-	document.styleSheets[0].insertRule('.hentry img.twitpic_thumb {display:block;position:absolute;left:500px;top:0px;z-index:100;width:100px;heigt100px;border:7px solid white;-webkit-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.7);-webkit-transform:scale(0.4) rotate(17deg); -webkit-transform-origin:50% 0%;-webkit-transition:-webkit-transform 0.15s ease-in;}',oLength+10);
-	document.styleSheets[0].insertRule('.hentry img.twitpic_thumb:hover {z-index:101;-webkit-transform:scale(1) rotate(0deg);}',oLength+11);
-	document.styleSheets[0].insertRule('div.conv_chain img.twitpic_thumb {position:absolute;left:435px; top:inherit;margin-top:-35px;-webkit-transform-origin:50% 0%;-webkit-transform:scale(0.3) rotate(17deg);}',oLength+12);
-	document.styleSheets[0].insertRule('div.conv_chain img.twitpic_thumb:hover {-webkit-transform-origin:50% 0%;-webkit-transform:scale(1) rotate(0deg);}',oLength+13);
-	document.styleSheets[0].insertRule('img.twitpic_thumb {display:block;position:absolute;z-index:900;width:100px;heigt100px;border:7px solid white;-webkit-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.7);-webkit-transform:translate(490px, -30px) scale(0.4) rotate(17deg); -webkit-transform-origin:50% 0%;-webkit-transition:-webkit-transform 0.15s ease-in;}',oLength+14);
-	document.styleSheets[0].insertRule('img.twitpic_thumb:hover {-webkit-transform: translate(490px, -30px) scale(1) rotate(0deg);}',oLength+15);
-	document.styleSheets[0].insertRule('div.conv_chain .actions, body#show div.conv_chain .actions {display:inline; visibility: hidden;padding-top:4px ; float:right; width:14px;line-height:0.8em; position:inherit;}',oLength+16);
-	document.styleSheets[0].insertRule('div.conv_chain:hover .actions, body#show div.conv_chain:hover .actions {visibility: visible;}',oLength+17);
-	document.styleSheets[0].insertRule('div.conv_chain .actions .pb-reply {padding:4px 6px; background-image: url(http://static.twitter.com/images/icon_reply.gif);}',oLength+18);
-	document.styleSheets[0].insertRule('div.conv_chain .actions .pb-fav-action {padding:4px 6px;}',oLength+19);
-	document.styleSheets[0].insertRule('span.pb-extra span {display:inline-block;box-sizing: content-box; height: 14px; font-size: 10px ;cursor:pointer; margin:0px 3px 5px 3px;padding:1px 6px;border:1px solid #cccccc; -webkit-border-radius: 4px;background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); -webkit-transition:-webkit-box-shadow 0.1s ease-in, color 0.1s ease-in, background 0.1s ease-in;}',oLength+20);
-	document.styleSheets[0].insertRule('li.status span.pb-extra, div.conv_chain span.pb-extra {opacity: 0; -webkit-transition:opacity 0.3s ease-in;}',oLength+21);	
-	document.styleSheets[0].insertRule('li.status:hover span.status-body span.meta span.pb-extra, div.conv_chain:hover span.pb-extra {opacity: 1;}',oLength+22);
-	document.styleSheets[0].insertRule('span.pb-extra span:hover {-webkit-box-shadow:0px 2px 3px rgba(0, 0, 0, 0.5);color:#444;background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#ccc), color-stop(0.1, #fff));}',oLength+23);
-	document.styleSheets[0].insertRule('span.pb-extra {display:block;color:#ccc;position:absolute;width:190px;height:12px;margin-left:230px;margin-top:-12px; text-align:right;  font-style:normal; font-family:sans-serif;}',oLength+24);
-	document.styleSheets[0].insertRule('span.meta.entry-meta {margin-top:5px;}',oLength+25);
-	document.styleSheets[0].insertRule('ol.statuses li {opacity: 1}',oLength+26);
-	document.styleSheets[0].insertRule('#pb_panel {position:absolute;top:0px;left: -140px;z-index:9999; padding:4px;background:white; -webkit-box-shadow:0px 4px 8px #888;opacity: 0; -webkit-transform: scale(0.2, 0); -webkit-transition:-webkit-transform 0.2s ease-in, opacity 0.3s ease-in;-webkit-transform-origin:100% 0%}',oLength+27);
-
-	//coloring for mine or pb-mention //
-	document.styleSheets[0].insertRule('ol.statuses li.pb-mention {background-color:rgb(96%,100%,100%);}',oLength+28);
-	document.styleSheets[0].insertRule('ol.statuses li.pb-mention:hover {background-color:rgb(88%,95%,99%);}',oLength+29);
-	document.styleSheets[0].insertRule('ol.statuses li.mine {background-color:rgb(93%,100%,96%);}',oLength+30);
-	document.styleSheets[0].insertRule('ol.statuses li.mine:hover {background-color:rgb(91%,100%,93%);}',oLength+31);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content.mine {background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mine_02.png) !important;}',oLength+32);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content.pb-mention{background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mention_02.png) !important;}',oLength+33);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content-before.mine { height:12px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mine_01.png)}',oLength+34);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content-before.pb-mention{ height:12px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mention_01.png)}',oLength+35);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content-after.mine { height:25px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mine_03.png)}',oLength+36);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-content-after.pb-mention{ height:25px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mention_03.png)}',oLength+37);
-	
-	//debug-css//
-	document.styleSheets[0].insertRule('.pb-debug-insert {background-color:red !important;}',oLength+38);
-	document.styleSheets[0].insertRule('div#footer {position:fixed; bottom:-20px; z-index:900; text-align:center; margin:0px auto 0px 140px;-webkit-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.75);-webkit-transition:bottom 0.2s ease-in;}',oLength+39);
-	document.styleSheets[0].insertRule('div.conv_chain span.entry-baloon {display:inline-block;width:422px;max-width:422px;vertical-align:bottom;margin:0px 0px 0px 0px;}',oLength+40);
-	document.styleSheets[0].insertRule('ol#timeline {padding-left:0px !important;}',oLength+41);
-	
-	document.styleSheets[0].insertRule('span.pb-extra span.pb-rtweet a:hover, span.pb-via a:hover, span.pb-dm a:hover {text-decoration : none;}',oLength+42);
-	document.styleSheets[0].insertRule('div#footer:hover {bottom: 0px;}',oLength+43);
-
-	// for snip url
-	document.styleSheets[0].insertRule('a.pb-snip-url {display:inline-block;margin:-3px -4px; padding: 1px 4px; border:1px solid transparent; text-decoration:none; -webkit-border-top-left-radius: 5px 5px;-webkit-border-top-right-radius: 5px 5px; -webkit-transition:background 0.2s ease-in, width 0.2s ease-in;}',oLength+44);
-	document.styleSheets[0].insertRule('a.pb-snip-url:hover {display:inline-block; border:1px solid #999; background-color: #ccc; text-decoration:none; background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff));}',oLength+45);
-	document.styleSheets[0].insertRule('a.pb-snip-url span {display:block; opacity: 0; position:absolute ;min-width:250px; min-height: 16px;margin:0px 0px 0px -5px;padding: 5px 5px; background-color: white; text-decoration:underline; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4);-webkit-transform:scale(0, 0);-webkit-transform-origin:0% 0%; -webkit-transition: width 0.2s ease-in, -webkit-transform 0.3s ease-in;}',oLength+46);
-	document.styleSheets[0].insertRule('a.pb-snip-url:hover span {opacity: 1; position:absolute ; z-index: 950;border:1px solid #999; background-color: white; text-decoration:underline;-webkit-transform:scale(1, 1);}',oLength+47);
-	document.styleSheets[0].insertRule('a.pb-snip-url:hover span.loading {background-image:url(http://assets0.twitter.com/images/loader.gif)}',oLength+48);
-
-	document.styleSheets[0].insertRule('ol.statuses span.status-body {overflow: inherit !important;}',oLength+49);
-	document.styleSheets[0].insertRule('.status-body > .pb-translated {display:block; border-top:1px dotted silver; color:#555; margin-top: 4px; padding-top:4px;}',oLength+50);
-	document.styleSheets[0].insertRule('.entry-baloon > .pb-translated {border:none; color:#555; padding-top: 4px;}',oLength+51);
-	document.styleSheets[0].insertRule('.translate-loading {text-align:center;}',oLength+52);
-	document.styleSheets[0].insertRule('div.conv_chain .pb-extra {width:190px; margin-left:200px;}',oLength+53);
-	document.styleSheets[0].insertRule('span.pb-extra .pb-trans {margin-right: 4px; height:12px;-webkit-border-radius:6px 6px; -webkit-transition:background 0.2s ease-in, color 0.2s ease-in;}',oLength+54);
-	document.styleSheets[0].insertRule('span.pb-extra .pb-trans:hover {color: #444; border:1px solid white; background-color:rgb(99%,92%,39%); background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(rgb(88%,75%,19%)), color-stop(0.1, rgb(97%,94%,38%)));}',oLength+55);
-	document.styleSheets[0].insertRule('#profile ol.statuses li.status .status-body > .entry-meta {margin-left:63px;}',oLength+56);
-
-	document.styleSheets[0].insertRule('body#profile ol.statuses .latest-status .conv_chain .entry-baloon .entry-content {font-size: 1em;}',oLength+57);
-
-	document.styleSheets[0].insertRule('ul.sidebar-menu li a span.pb-group-action {float:right;width:10px;}',oLength+58);
-	document.styleSheets[0].insertRule('ol.statuses li.status.pbHiddingGroup {-webkit-transform: scale(1, 0);}',oLength+59);
-	document.styleSheets[0].insertRule('ol.statuses li.status.pbHiddenGroup, ol.statuses li.status.pbInConv {display:none;}',oLength+60);
-	document.styleSheets[0].insertRule('.pbActiveGroup {background-color:white !important;}',oLength+61);
-	document.styleSheets[0].insertRule('div#pb-group span.vcard {padding : 0px 3px 2px 1px;}',oLength+62);
-	document.styleSheets[0].insertRule('div#pb-group li span.vcard a.url { display : inline ; background-color:transparent !important; padding: 0px;}',oLength+63);
-	document.styleSheets[0].insertRule('.pb-add-group input.uname {display:block; width: 157px;margin:1px 14px; padding:1px 2px;}',oLength+64);
-	document.styleSheets[0].insertRule('.pb-add-group {display:block; margin:1px 3px; padding-right:14px; text-align:right;}',oLength+65);
-	document.styleSheets[0].insertRule('div#pb-group .following { padding: 5px 10px 5px 14px; }',oLength+66);
-	document.styleSheets[0].insertRule('.xref {margin-left:5px;}',oLength+67);
-
-	document.styleSheets[0].insertRule('.conv-read-more {padding : 4px; font-size : 12px; text-align: center; font-weight:bold; color: #999; cursor:pointer; border: 1px solid #ccc; -webkit-border-radius: 4px; background-color: white; background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); background-repeat : no-repeat; background-position: center;}',oLength+68);
-	document.styleSheets[0].insertRule('.conv-read-more:hover {color: #555; cursor:pointer; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4)}',oLength+69);
-
-	document.styleSheets[0].insertRule('.Notifire { margin-left: 13px; margin-top: 10px; width: 450px ; min-height: 40px; clear : both ; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4) ; -webkit-border-radius : 8px ; opacity : 0 ; -webkit-transform : translate( 0px , -20px) ; -webkit-transform-origin : 50% 50% ; -webkit-transition : -webkit-transform 0.2s ease-in , opacity 0.4s ease-in ;}',oLength+70);
-	document.styleSheets[0].insertRule('#notifire_canvas .Notifire-popon { opacity : 1 ; -webkit-transform : translate( 0px , 0px ) ; }',oLength+71);
-	document.styleSheets[0].insertRule('#notifire_canvas .Notifire-pushout {  opacity : 0 ; }',oLength+72);
-	document.styleSheets[0].insertRule('.Notifire div.icon {float : left ; padding : 5px;}',oLength+73);
-	document.styleSheets[0].insertRule('.Notifire img.icon { width : 30px ; height 30px }',oLength+74);
-	document.styleSheets[0].insertRule('.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}',oLength+75);
+	GM_addStyle(<><![CDATA[s
+		div.conv_chain {clear:both; text-align:left;margin: 5px 5px 10px 0px; padding:0px 0px 0px 0px;}
+		div.conv_chain div.thumb{width: 34px !important; height: 34px !important; position:relative !important;max-width:100px;}
+		div.conv_chain div.thumb img{vertical-align:top; margin-right:4px !important;width:60px !important;max-width:60px !important;height:32px !important;}
+		div.conv_chain span.icons{display:inline-block;margin-left:10px;text-align:center;padding:0px 0px 10px 0px;width:50px !important;max-width:50px !important;}
+		div.conv_chain span.icons img{max-width:40px;max-height:40px;}
+		div.conv_chain span.icons a:hover {text-underline: none;}
+		div.conv_chain span.entry-content, body#show #content div.conv_chain span.entry-content{display:block;width:400px;max-width:400px;min-height:24px;margin:0px 0px 0px 0px;padding:0px 12px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_02.png); background-repeat:repeat-y;}
+		div.conv_chain span.entry-content-before{display:block;width:400px;max-width:400px; height:12px;margin:0px 0px 0px 0px;padding:0px 6px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_01.png); background-repeat:no-repeat;}
+		div.conv_chain span.entry-content-after {display:block;width:400px;max-width:400px; height:25px;margin:0px 0px -10px 0px;padding:0px 6px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_03.png); background-repeat:no-repeat; background-position:0px -4px;}
+		div.conv_chain span.meta.entry-meta {clear:right; display:block;padding-left:24px; height:14px; margin-top:4px}
+		.hentry img.twitpic_thumb {display:block;position:absolute;left:500px;top:0px;z-index:100;width:100px;heigt100px;border:7px solid white;-moz-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.7);-moz-transform:scale(0.4) rotate(17deg); -moz-transform-origin:50% 0%;-moz-transition:-moz-transform 0.15s ease-in;}
+		.hentry img.twitpic_thumb:hover {z-index:101;-moz-transform:scale(1) rotate(0deg);}
+		div.conv_chain img.twitpic_thumb {position:absolute;left:435px; top:inherit;margin-top:-35px;-moz-transform-origin:50% 0%;-moz-transform:scale(0.3) rotate(17deg);}
+		div.conv_chain img.twitpic_thumb:hover {-moz-transform-origin:50% 0%;-moz-transform:scale(1) rotate(0deg);}
+		img.twitpic_thumb {display:block;position:absolute;z-index:900;width:100px;heigt100px;border:7px solid white;-moz-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.7);-moz-transform:translate(490px, -30px) scale(0.4) rotate(17deg); -moz-transform-origin:50% 0%;-moz-transition:-moz-transform 0.15s ease-in;}
+		img.twitpic_thumb:hover {-moz-transform: translate(490px, -30px) scale(1) rotate(0deg);}
+		div.conv_chain .actions, body#show div.conv_chain .actions {display:inline; visibility: hidden;padding-top:4px ; float:right; width:14px;line-height:0.8em; position:inherit;margin-right:10px;}
+		div.conv_chain:hover .actions, body#show div.conv_chain:hover .actions {visibility: visible;}
+		div.conv_chain .actions .pb-reply {padding:4px 6px; background-image: url(http://static.twitter.com/images/icon_reply.gif);}
+		div.conv_chain .actions .pb-fav-action {padding:4px 6px;}
+		span.pb-extra span {display:inline-block;box-sizing: content-box; height: 14px; font-size: 10px ;cursor:pointer; margin:0px 3px 5px 3px;padding:1px 6px;border:1px solid #cccccc; -moz-border-radius: 4px;background:#eee;}
+		li.status span.pb-extra, div.conv_chain span.pb-extra {opacity: 0;}
+		li.status:hover span.status-body span.meta span.pb-extra, div.conv_chain:hover span.pb-extra {opacity: 1;}
+		span.pb-extra span:hover {-moz-box-shadow:0px 2px 3px rgba(0, 0, 0, 0.5);color:#444;background-color:#fff;}
+		span.pb-extra {display:block;color:#ccc;position:absolute;width:190px;height:12px;margin-left:230px;margin-top:-16px; text-align:right;  font-style:normal; font-family:sans-serif;}
+		ol.statuses span.meta.entry-meta {margin-top:5px;}
+		ol.statuses li {opacity: 1}
+		#pb_info {display: inherit !important;}
+		#pb_panel {position: absolute;top:0px; display : none ; left: -140px; left: -130px; padding:4px;background:white; z-index: 9999;}
+		#pb_panel * {display: inherit;}
+		
+		ol.statuses li.pb-mention {background-color:rgb(96%,100%,100%);}
+		ol.statuses li.pb-mention:hover {background-color:rgb(88%,95%,99%);}
+		ol.statuses li.mine {background-color:rgb(93%,100%,96%);}
+		ol.statuses li.mine:hover {background-color:rgb(91%,100%,93%);}
+		div.conv_chain span.entry-content.mine {background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mine_02.png) !important;}
+		div.conv_chain span.entry-content.pb-mention{background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mention_02.png)}
+		div.conv_chain span.entry-content-before.mine { height:12px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mine_01.png)}
+		div.conv_chain span.entry-content-before.pb-mention{ height:12px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mention_01.png)}
+		div.conv_chain span.entry-content-after.mine { height:25px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mine_03.png)}
+		div.conv_chain span.entry-content-after.pb-mention{ height:25px;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_mention_03.png)}
+		
+		.pb-debug-insert {background-color:red !important;}
+		div#footer {position:fixed; bottom:-20px; z-index:900; text-align:center; margin:0px auto 0px 140px;-moz-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.75);-moz-transition:bottom 0.2s ease-in;}
+		div.conv_chain span.entry-baloon {display:inline-block;width:422px;max-width:422px;vertical-align:bottom;margin:0px 0px 0px 0px;}
+		ol#timeline {padding-left:0px !important;}
+		
+		span.pb-extra span.pb-rtweet a:hover, span.pb-via a:hover, span.pb-dm a:hover {text-decoration : none;}
+		div#footer:hover {bottom: 0px;}
+		
+		a.pb-snip-url {display:inline-block;margin:-3px -4px; padding: 1px 4px; border:1px solid transparent; text-decoration:none; -moz-border-top-left-radius: 5px 5px;-moz-border-top-right-radius: 5px 5px;}
+		a.pb-snip-url:hover {display:inline-block; border:1px solid #999; background-color: #ccc; text-decoration:none; background:-moz-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff));}
+		a.pb-snip-url span {display:block; opacity: 0; position:absolute ;min-width:250px;max-width:400px;  min-height: 16px;margin:0px 0px 0px -5px;padding: 5px 5px; background-color: white; text-decoration:underline; -moz-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4);-moz-transform:scale(0, 0);-moz-transform-origin:0% 0%;}
+		a.pb-snip-url:hover span {opacity: 1; position:absolute ; z-index: 950;border:1px solid #999; background-color: white; text-decoration:underline;-moz-transform:scale(1, 1);}
+		a.pb-snip-url:hover span.loading {background-image:url('http://assets0.twitter.com/images/loader.gif')}
+		
+		ol.statuses span.status-body {overflow: inherit !important;}
+		.status-body > .pb-translated {display:block; border-top:1px dotted silver; color:#555; margin-top: 4px; padding-top:4px;}
+		.entry-baloon > .pb-translated {border:none; color:#555; padding-top: 4px;}
+		.translate-loading {text-align:center;}
+		ol.statuses div.conv_chain .pb-extra {width:190px; margin-left:216px;}
+		ol.statuses span.pb-extra .pb-trans {margin-right: 4px; height:14px;-moz-border-radius:6px 6px;}
+		ol.statuses span.pb-extra .pb-trans:hover {color: #444; border:1px solid white; background-color:rgb(99%,92%,39%); background: -moz-gradient(linear, left top, left bottom, from(#fff), to(rgb(88%,75%,19%)), color-stop(0.1, rgb(97%,94%,38%)));}
+		#profile ol.statuses li.status .status-body > .entry-meta {margin-left:63px;}
+		
+		body#profile ol.statuses .latest-status .conv_chain .entry-baloon .entry-content {font-size: 1em;}
+		
+		ul.sidebar-menu li a span.pb-group-action {float:right;width:10px;}
+		ol.statuses li.status.pbHiddingGroup {-moz-transform: scale(1, 0);}
+		ol.statuses li.status.pbHiddenGroup, ol.statuses li.status.pbInConv {display:none;}
+		.pbActiveGroup {background-color:white !important;}
+		div#pb-group span.vcard {padding : 0px 3px 2px 1px;}
+		div#pb-group li span.vcard a.url { display : inline ; background-color:transparent !important; padding: 0px;}
+		.pb-add-group input.uname {display:block; width: 157px;margin:1px 14px; padding:1px 2px;}
+		.pb-add-group {display:block; margin:1px 3px; padding-right:14px; text-align:right;}
+		div#pb-group .following { padding: 5px 10px 5px 14px; }
+		.xref {margin-left:5px;}
+		
+		.conv-read-more {padding : 4px; font-size : 12px; text-align: center; font-weight:bold; color: #999; cursor:pointer; border: 1px solid #ccc; -moz-border-radius: 4px; background-color: white; background:-moz-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); background-repeat : no-repeat; background-position: center;}
+		.conv-read-more:hover {color: #555; cursor:pointer; -moz-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4)}
+		
+		.Notifire { margin-left: 13px; margin-top: 10px; width: 450px ; min-height: 40px; clear : both ; -moz-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4) ; -moz-border-radius : 8px ; opacity : 0 ; -moz-transform : translate( 0px , -20px) ; -moz-transform-origin : 50% 50% ; -moz-transition : -moz-transform 0.2s ease-in , opacity 0.4s ease-in ;}
+		#notifire_canvas .Notifire-popon { opacity : 1 ; -moz-transform : translate( 0px , 0px ) ; }
+		#notifire_canvas .Notifire-pushout {  opacity : 0 ; }
+		.Notifire div.icon {float : left ; padding : 5px;}
+		.Notifire img.icon { width : 30px ; height 30px }
+		.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}
+		]]></>);
 }
 
 
@@ -2584,7 +2607,9 @@ var BitlyClient = new BitlyApiClient();
 */
 })();
 
-place_picture = function(id,pic_thumb_src,snip_code){
+
+unsafeWindow.place_picture = function(id,pic_thumb_src,snip_code)
+{
 	if(pic_thumb_src.match(/^http.+/))
 	{
 		if(pic_thumb_src.match(/^http:\/\/s3\.amazonaws.com.+photo\-feed\.jpg$/)){
@@ -2592,7 +2617,7 @@ place_picture = function(id,pic_thumb_src,snip_code){
 				var pic_thumb_link = document.createElement('a');
 				pic_thumb_link.setAttribute("href", "http://bkite.com/" + snip_code);
 				pic_thumb_link.setAttribute("target", "_blank");
-				var pic_thumb_id = guid();
+				var pic_thumb_id = unsafeWindow.guidG();
 				pic_thumb_link.setAttribute("id",pic_thumb_id);
 				pic_thumb.setAttribute("class","twitpic_thumb");
 				pic_thumb.setAttribute("src", pic_thumb_src);
@@ -2603,7 +2628,7 @@ place_picture = function(id,pic_thumb_src,snip_code){
 				var pic_thumb_link = document.createElement('a');
 				pic_thumb_link.setAttribute("href", snip_code);
 				pic_thumb_link.setAttribute("target", "_blank");
-				var pic_thumb_id = guid();
+				var pic_thumb_id = unsafeWindow.guidG();
 				pic_thumb_link.setAttribute("id",pic_thumb_id);
 				pic_thumb.setAttribute("class","twitpic_thumb");
 				pic_thumb.setAttribute("src", pic_thumb_src);
@@ -2613,32 +2638,33 @@ place_picture = function(id,pic_thumb_src,snip_code){
 	}
 }
 
-expand_url = function(real_url, id){
+unsafeWindow.expand_url = function(real_url, id)
+{
 	if(real_url.match(/^https*\:\/\/.+/))
 	{
 		var target = document.getElementById(id);
 		target.removeEventListener("mouseover", function(e){if(e.target.tagName == 'A'){pb_snip_expander(e.target)}},"false");
-		document.getElementById(id).innerText = real_url;
+		document.getElementById(id).textContent = real_url;
 		var real_url_link = document.createElement('a');
 		real_url_link.href = real_url.replace(/\, /g , ',');
-		real_url_link.innerText = real_url.replace(/\, /g , ',');
+		real_url_link.textContent = real_url.replace(/\, /g , ',');
 		real_url_link.innerHTML = real_url_link.innerHTML.replace(/([\/\-?\=\+\%])/g , '$1&shy;');
 		real_url_link.target = '_blank';
-		target.innerText = '';
+		target.textContent = '';
 		target.appendChild(real_url_link);
-		addClass(real_url_link, 'pb-real-url');
-		removeClass(target,'loading');
+		unsafeWindow.addClassG(real_url_link, 'pb-real-url');
+		unsafeWindow.removeClassG(target,'loading');
 	}
 	else
 	{
 		var target = document.getElementById(id);
 		target.removeEventListener("mouseover", function(e){if(e.target.tagName == 'A'){pb_snip_expander(e.target)}},"false");
-		document.getElementById(id).innerText = 'can\'t read real url';
-		removeClass(target,'loading');
+		document.getElementById(id).textContent = 'can\'t read real url';
+		unsafeWindow.removeClassG(target,'loading');
 	}
 }
 
-expandResponse = function(data , target_id)
+unsafeWindow.expandResponse = function(data , target_id)
 {	//bit.ly expander support script
 	var result;
 	var url_list;
@@ -2653,11 +2679,11 @@ expandResponse = function(data , target_id)
 			real_url = data.results[key]['longUrl'];
 		}
 	}
-	expand_url( real_url , target_id );
+	unsafeWindow.expand_url( real_url , target_id );
 	return;
 }
 
-bitly_shorten_URL = function(data)
+unsafeWindow.bitly_shorten_URL = function(data)
 {	//bit.ly shorten support script
 	var result;
 	var url_list;
@@ -2678,19 +2704,18 @@ bitly_shorten_URL = function(data)
 			document.getElementById('status').value = replace_text;
 		}
 	}
-	//alert(original_url + ' > ' + short_url);
 	return;
 }
 
-
-gTransExp = function(){
+unsafeWindow.gTransExp = function()
+{
 	var target_id = arguments[0].replace(/__/g,'-');
 	if(arguments[3] != null)
 	{ //error
 		var target_object = document.getElementById(target_id).getElementsByClassName('entry-content')[0];
 		var translated_object = document.getElementById(target_id).getElementsByClassName('pb-translated')[0];
 		translated_object.innerHTML = "" + arguments[3];
-		removeClass(translated_object,'translate-loading');
+		unsafeWindow.removeClassG(translated_object,'translate-loading');
 	} else {
 		var context = arguments[1].translatedText;
 		var org_lang = arguments[1].detectedSourceLanguage;
@@ -2705,23 +2730,23 @@ gTransExp = function(){
 				var target_object = document.getElementById(target_id).getElementsByClassName('entry-content')[0];
 				var translated_object = document.getElementById(target_id).getElementsByClassName('pb-translated')[0];
 				translated_object.innerHTML = "" + context + " -- from :" + org_lang;
-				removeClass(translated_object,'translate-loading');
+				unsafeWindow.removeClassG(translated_object,'translate-loading');
 			}
 	}
 }
 
-S4 = function() {
+unsafeWindow.S4G = function() 
+{
    return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
 }
-
-guid = function() {
-   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+unsafeWindow.guidG = function() 
+{
+   return (unsafeWindow.S4G()+unsafeWindow.S4G()+"-"+unsafeWindow.S4G()+"-"+unsafeWindow.S4G()+"-"+unsafeWindow.S4G()+"-"+unsafeWindow.S4G()+unsafeWindow.S4G()+unsafeWindow.S4G());
 }
 
-//Standard function
-hasClass = function(ele,cls) {
-	try
-	{
+unsafeWindow.hasClassG = function(ele,cls) 
+{
+	try{
 		return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
 	}
 	catch(err)
@@ -2730,13 +2755,15 @@ hasClass = function(ele,cls) {
 	}
 }
 
-addClass = function(ele,cls) {
-	if (!hasClass(ele,cls)) ele.className += " "+cls;
+unsafeWindow.addClassG = function(ele,cls) 
+{
+	if (!unsafeWindow.hasClassG(ele,cls)) ele.className += " "+cls;
 }
 
-removeClass = function(ele,cls) {
-	if (hasClass(ele,cls)) {
-		var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
-		ele.className=ele.className.replace(reg,'');
+unsafeWindow.removeClassG = function(ele,cls) 
+{
+	if (unsafeWindow.hasClassG(ele,cls)) {
+	var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+	ele.className=ele.className.replace(reg,'');
 	}
 }
