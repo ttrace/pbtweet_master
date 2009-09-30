@@ -1386,7 +1386,7 @@ function pb_extra_set(target)
 	if( !document.getElementById('status_update_box') )
 	{
 		my_pb_rtwweet.innerHTML = '<a href ="http://twitter.com/?status=' + 'RT @' + my_reply_to + ': ' + encodeURIComponent(tweet_string) + '">RT&nbsp;@:</a>';	
-		my_pb_via.innerHTML = '<a href="http://twitter.com/?status=' + encodeURIComponent(tweet_string) + '(via @' + my_reply_to + ')">(via&nbsp;@)</a>';
+		my_pb_via.innerHTML = '<a href="http://twitter.com/?status=' + encodeURIComponent(tweet_string) + '(via @' + my_reply_to + ' ' + my_in_reply_to_url + ' )">(via&nbsp;@)</a>';
 		my_pb_dm.innerHTML =  "<a href='http://twitter.com/direct_messages/create/" + my_reply_to +"'>DM</a>";
 		my_pb_rtwweet.addEventListener("click", function(e){protect_alert(my_reply_to);}, false);
 		my_pb_via.addEventListener("click", function(e){protect_alert(my_reply_to);}, false);
