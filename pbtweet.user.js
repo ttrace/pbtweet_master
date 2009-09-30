@@ -1383,7 +1383,6 @@ function pb_extra_set(target)
 		my_pb_dm.innerHTML =  "<a href='http://twitter.com/direct_messages/create/" + my_reply_to +"'>DM</a>";
 		my_pb_rtwweet.addEventListener("click", function(e){protect_alert(my_reply_to);}, false);
 		my_pb_via.addEventListener("click", function(e){protect_alert(my_reply_to);}, false);
-		my_pb_dm.getElementsByTagName('a')[0].addEventListener("click", function(e){message_prohibition(my_reply_to);}, false);
 	}
 	
 	target_meta.appendChild(my_pb_extra);
@@ -1532,23 +1531,10 @@ function pb_message(event)
 	
 	var reply_to = in_reply_to_url.match(/twitter\.com\/([^\/]+)\/status/)[1];
 
-	var userinfo = fetch_user_info(reply_to);
-	if(userinfo)
-	{
-		if( userinfo.following == false)
-		{
-			if( pb_lang != "ja")
-			{
-				alert(reply_to +" seems not your friend...");
-			} else {
-				alert(reply_to +"さんにはメッセージを送信できません。");			
-			}
-		} else {
-			elm.value = "D " + reply_to + " ";
-			elm.focus();
-			elm.setSelectionRange(elm.value.length, elm.value.length);
-		}
-	}
+	elm.value = "D " + reply_to + " ";
+	elm.focus();
+	elm.setSelectionRange(elm.value.length, elm.value.length);
+
 	return(false);
 }
 
@@ -1574,6 +1560,8 @@ function protect_alert(reply_to)
 
 function message_prohibition(send_to)
 {
+	// this function is not used under 1.5.
+	// Reason of leaving this is for using under 1.6.
 	var userinfo = fetch_user_info(send_to);
 	if(userinfo)
 	{
