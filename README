@@ -1,3 +1,12 @@
+About pbtweet
+
+pbtweet is small program that enhances your twitter experience. 
+Infinite timeline scrolling, automatic updating, RT/via style quoting tweet
+, translating tweets, picture thumbnail badges, translation and
+inline reply chains to twitter.com.
+
+http://web.me.com/t_trace/pbtweet.html
+
 License
 
 pbtweet is published under MIT License.
