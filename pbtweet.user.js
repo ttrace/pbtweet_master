@@ -1245,7 +1245,7 @@ function pb_snip_expander( target )
 	var url_alias = target.href;
 //	var snip_pattern = /http\:\/\/bit\.ly\/.+|http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
 	var snip_pattern = /http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
-	var bitly_pattern = /http\:\/\/(bit\.ly|j\.mp)\/[a-zA-Z0-9]+/;
+	var bitly_pattern = /(http\:\/\/(bit\.ly|j\.mp)\/[a-zA-Z0-9]+)[\+]?/;
 	var ffim_pattern = /http\:\/\/ff\.im\/\-.+/;
 	if( url_alias.match( snip_pattern ) )
 	{	//search twitter.com JSONP
@@ -1267,9 +1267,9 @@ function pb_snip_expander( target )
 		turl_loader.src = "http://pipes.yahoo.com/pipes/pipe.run?_id=c67eb2388cba44aa76667c00ae58aa88&_render=json&urlinput=" + url_alias + "&parentid=" + id + "&_callback=pbTurlExp";
 		document.getElementsByTagName("head")[0].appendChild(turl_loader);
 	}
-	else if( url_alias.match(bitly_pattern) )
+	else if( url_alias.match(bitly_pattern)[1] )
 	{
-		var url_alias = url_alias;
+		var url_alias = url_alias.match(bitly_pattern)[1];
 		var id =  target.getElementsByTagName('span')[0].id;
 		var function_name = 'bitly' + id.replace( /\-/g , '');
 		
