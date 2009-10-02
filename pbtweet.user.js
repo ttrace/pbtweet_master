@@ -1,4 +1,4 @@
-﻿//v1.5 master 0073
+﻿//v1.5 dev 0074
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -29,7 +29,7 @@ function pb_init()
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 master 0073";
+	pb_version = "v1.5 dev 0074";
 	pb_active_group = null;
 
 	//preference values
