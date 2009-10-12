@@ -1,4 +1,4 @@
-﻿//v1.5 GM 0073
+﻿//v1.5 GM 0074
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -31,7 +31,7 @@ function pb_init()
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 GM 0073";
+	pb_version = "v1.5 GM 0074";
 	pb_active_group = null;
 
 	//preference values
@@ -338,6 +338,12 @@ function pbtweet_main(target)
 					if(entry[i].getElementsByClassName('entry-content')[0])
 					{	// normal tweet
 						entry[i].getElementsByClassName('entry-content')[0].innerHTML = pb_link_maker(entry[i].getElementsByClassName('entry-content')[0].innerHTML,'main');
+						//@jamadam added below
+						var links = entry[i].getElementsByClassName('entry-content')[0].getElementsByTagName('a');
+						for (var cnt = 0; cnt < links.length; cnt++) {
+							links[cnt].href=decodeURI(links[cnt].href);
+						}
+						// @jamadam added above
 					}
 					else if(entry[i].getElementsByClassName('msgtxt')[0])
 					{	// search tweet
