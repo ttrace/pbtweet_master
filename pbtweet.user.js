@@ -1187,7 +1187,7 @@ function pb_link_maker(string)
 	if(!arguments[1]){
 		linked_source = source.replace(/(https*\:\/\/[^\s\*\]\(\)]+)/g, "<a class='pb-link' href='$1' target='_blank'>$1</a>");
 		linked_source = linked_source.replace(/blank\'\>([^\<]{28})[^\<]+\<\/a/g, "blank'>$1...</a");
-		linked_source = linked_source.replace(/(\s+)\#([a-zA-Z0-9À-ȷ]+)(\s*)/g,"$1<a class='pb-link hashtag' href='" + window.location.protocol + "//twitter.com/search?q=%23$2' target='_blank'>#$2</a>$3");
+		linked_source = linked_source.replace(/\#(([^\s]*[0-9a-zA-Z\_]+[^\s]*){1,16})([\s|\b|\n|$]*)/g,"<a class='pb-link hashtag' href='" + window.location.protocol + "//twitter.com/search?q=%23$1' target='_blank'>#$1</a>$3");
 	}
 	linked_source = linked_source.replace(/\@([0-9a-zA-Z\_\-]+)/g,"@<a class='pb-link sname' href='" + window.location.protocol + "//twitter.com/$1' target='_blank'>$1</a>");
 	//hashtag link
