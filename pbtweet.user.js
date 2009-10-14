@@ -9,7 +9,6 @@
 // UPDATE INFO http://web.me.com/t_trace/pbtweet.html
 
 ( function(){
-
 // initialize pbtweet if pbtweet not works.
 if(!document.getElementById('pb_info'))
 {
@@ -26,6 +25,7 @@ function pb_init()
 	setTimeout( pb_css_set() , 1 );
 	conv_chain_hash = new Array(0);
 	session_id = document.getElementsByName('session-user-screen_name')[0].content;
+	
 	pb_latest_update = new Date();
 
 	//information panel
@@ -342,6 +342,20 @@ function pbtweet_main(target)
 						entry[i].getElementsByClassName('msgtxt')[0].innerHTML = pb_link_maker(entry[i].getElementsByClassName('msgtxt')[0].innerHTML,'main');					
 					}
 
+					if(entry[i].getElementsByClassName('reply')[0])
+					{
+						//window.console.log += '\n' + entry[i].id;
+						entry[i].getElementsByClassName('reply')[0].addEventListener(
+							"click",
+							function(event)
+							{
+								pb_reply(event);
+								stopPropagation();
+								preventDefault();
+							},
+							true
+						); // to assign reply code on original reply button.
+					}
 					pb_snip_retreiver(entry[i]);
 					twitpic_thumb(entry[i].id,entry[i].innerHTML);
 					pb_extra_set(entry[i]);
@@ -401,7 +415,7 @@ function pbtweet_main(target)
 			}
 			catch(err)
 			{
-				window.console.log = window.console.log + err.message;
+				//window.console.log(err.message);
 			}
 	}
 }
@@ -942,7 +956,7 @@ function insert_update()
 				{
 					//add reply function
 					try{
-						updated_entry.getElementsByClassName("reply")[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault()}, false);
+						//updated_entry.getElementsByClassName("reply")[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault()}, false);
 					} catch(err){
 					}
 					//add face event
@@ -1472,7 +1486,6 @@ function pb_reply(event)
 	var my_in_reply_to_url = "";
 
 	var elm = document.getElementById("status");
-
 	switch(event.target.className)
 	{
 		case "pb-rtweet":
@@ -1499,12 +1512,43 @@ function pb_reply(event)
 			elm.value = "@" + reply_to + " " + elm.value;
 			break;
 		default:
-			var in_reply_to_url = target.name;
+			if(!target.href)
+			{
+				var in_reply_to_url = target.name;
+			}
+			else
+			{
+				var in_reply_to_url = target.href;
+			}
 			var reply_to = in_reply_to_url.match(/in\_reply\_to\=(.+)$/)[1];
 			var my_in_reply_to_url = in_reply_to_url.match(/status\_id\=([0-9]+)\&/)[1];
 			var id_remover = new RegExp("\@" + reply_to + "\ ");
 			elm.value = elm.value.replace(id_remover,"");
 			elm.value = "@" + reply_to + " " + elm.value;
+			if(event.shiftKey)
+			{
+				var user_account_regexp = /\@[a-zA-Z0-9\_]+/g;
+				if(target.parentNode.parentNode.getElementsByClassName('entry-content')[0])
+				{
+					var original_message = pb_link_remover(target.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+				}
+				else
+				{
+					var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+				}
+				var additional_reply_list = original_message.match( user_account_regexp );
+				for(var i = 0 ; i < additional_reply_list.length ; i ++)
+				{
+					if(additional_reply_list[i].match(/\@(.+)/)[1] != session_id )
+					{
+						elm.value += additional_reply_list[i] + " ";
+					}
+				}				
+			}
+			else
+			{
+				//window.console.log( "" );
+			}
 	}
 	
 	document.getElementById("in_reply_to_status_id").value = my_in_reply_to_url;
