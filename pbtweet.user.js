@@ -350,8 +350,7 @@ function pbtweet_main(target)
 							function(event)
 							{
 								pb_reply(event);
-								stopPropagation();
-								preventDefault();
+								event.preventDefault();
 							},
 							true
 						); // to assign reply code on original reply button.
@@ -1539,11 +1538,13 @@ function pb_reply(event)
 				var additional_reply_list = original_message.match( user_account_regexp );
 				for(var i = 0 ; i < additional_reply_list.length ; i ++)
 				{
-					if(additional_reply_list[i].match(/\@(.+)/)[1] != session_id )
+					var adding_user_name = additional_reply_list[i].match(/\@(.+)/)[1];
+					var is_user_exist = new RegExp("@" + adding_user_name, "g");
+					if( adding_user_name != session_id && !elm.value.match(is_user_exist) )
 					{
 						elm.value += additional_reply_list[i] + " ";
 					}
-				}				
+				}
 			}
 			else
 			{
