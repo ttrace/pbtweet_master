@@ -1,4 +1,4 @@
-//v1.5 dev 0074
+//v1.5 dev 0076
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -29,7 +29,7 @@ function pb_init()
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 dev 0074";
+	pb_version = "v1.5 dev 0076";
 	pb_active_group = null;
 
 	//preference values
@@ -211,8 +211,13 @@ function pb_init()
 	{
 		master_fav = document.createElement('a');
 		master_fav.className = "fav-action";
-		master_reply = document.createElement('a');
+		master_reply = document.createElement('span');
 		master_reply.className = "reply";
+		var master_reply_reply_icon = document.createElement('span');
+			master_reply_reply_icon.className = "reply-icon icon";
+		var master_reply_link = document.createElement('a');
+		master_reply_reply_icon.appendChild(master_reply_link);
+		master_reply.appendChild(master_reply_reply_icon);
 	}
 
 	pb_snip_url = document.createElement('span');
@@ -341,11 +346,15 @@ function pbtweet_main(target)
 					{	// search tweet
 						entry[i].getElementsByClassName('msgtxt')[0].innerHTML = pb_link_maker(entry[i].getElementsByClassName('msgtxt')[0].innerHTML,'main');					
 					}
+					pb_snip_retreiver(entry[i]);
+					twitpic_thumb(entry[i].id,entry[i].innerHTML);
+					pb_extra_set(entry[i]);
+					pb_appearance_set(entry[i]);
 
 					if(entry[i].getElementsByClassName('reply')[0])
 					{
-						//window.console.log += '\n' + entry[i].id;
-						entry[i].getElementsByClassName('reply')[0].addEventListener(
+//						window.console.log += '\n' + entry[i].id;
+						entry[i].getElementsByClassName('reply')[0].getElementsByTagName('a')[0].addEventListener(
 							"click",
 							function(event)
 							{
@@ -355,10 +364,6 @@ function pbtweet_main(target)
 							true
 						); // to assign reply code on original reply button.
 					}
-					pb_snip_retreiver(entry[i]);
-					twitpic_thumb(entry[i].id,entry[i].innerHTML);
-					pb_extra_set(entry[i]);
-					pb_appearance_set(entry[i]);
 				}
 				var meta_url_list = entry[i].getElementsByClassName('meta')[0].getElementsByTagName('a');
 				var get_url = "";
@@ -501,8 +506,9 @@ function retreve_data( get_url , my_node , count )
 			//var conv_path = location.href.match(/.+\/\/twitter.com(\/[^\/]+)/)[1];
 			var conv_path = 'http://twitter.com/';
 			var href_match = /.+\:\/\/twitter\.com\/(.+)\/status\/([0-9]+)/;
-			conv_reply.href = conv_path + "?status=@" + conv_meta.match(href_match)[1] + "%20&amp;in_reply_to_status_id=" + conv_meta.match(href_match)[2] + "&amp;in_reply_to=" + conv_meta.match(href_match)[1];
-			conv_reply.title = "reply to " + conv_meta.match(href_match)[1];
+			conv_reply.getElementsByTagName('a')[0].href = conv_path + "?status=@" + conv_meta.match(href_match)[1] + "%20&amp;in_reply_to_status_id=" + conv_meta.match(href_match)[2] + "&amp;in_reply_to=" + conv_meta.match(href_match)[1];
+			conv_reply.getElementsByTagName('a')[0].title = "reply to " + conv_meta.match(href_match)[1];
+			//window.console.log += conv_reply.getElementsByTagName('a')[0].href;
 			conv_fav.id = "status_star_" + conv_meta.match(href_match)[2];
 
 			conv_reply.className = "pb-reply";
@@ -515,15 +521,15 @@ function retreve_data( get_url , my_node , count )
 			conv_chain.insertBefore(conv_action, conv_baloon.nextSibling);
 
 			//add reply function
-			conv_reply.name = conv_reply.href;
+			conv_reply.name = conv_reply.getElementsByTagName('a')[0].href;
 			if( document.body.id.match(/home|replies|favorites|search/) )
 			{
 				// home
-				conv_reply.removeAttribute("href");
-				conv_reply.addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, false);
+				//conv_reply.getElementsByTagName('a')[0].removeAttribute("href");
+				conv_reply.getElementsByTagName('a')[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, false);
 			} else {
-				conv_reply.href = conv_reply.href.replace(/twitter.com\/(timeline\/)*[^\?]+/, "twitter.com/$1home");
-				conv_reply.href = conv_reply.href.replace(/&amp;/g, "&");
+				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/twitter.com\/(timeline\/)*[^\?]+/, "twitter.com/$1home");
+				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/&amp;/g, "&");
 			}
 			
 			//add fave event
@@ -1480,7 +1486,9 @@ function pb_changelang(event)
 // reply function
 function pb_reply(event)
 {
+				//window.console.log += event;
 	var target = event.target;
+				//window.console.log += target;
 	var msg_body = "";
 	var my_in_reply_to_url = "";
 
@@ -1527,12 +1535,12 @@ function pb_reply(event)
 			if(event.shiftKey)
 			{
 				var user_account_regexp = /\@[a-zA-Z0-9\_]+/g;
-				if(target.parentNode.parentNode.getElementsByClassName('entry-content')[0])
-				{
-					var original_message = pb_link_remover(target.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
-				}
-				else
-				{
+				if(target.href)
+ 				{
+ 					var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+ 				}
+ 				else
+ 				{
 					var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
 				}
 				var additional_reply_list = original_message.match( user_account_regexp );
