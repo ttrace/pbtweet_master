@@ -1,4 +1,4 @@
-﻿//v1.5 GM 0074
+//v1.5 GM 0076
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -28,10 +28,11 @@ function pb_init()
 	pb_css_set();
 	conv_chain_hash = new Array(0);
 	session_id = document.getElementsByName('session-user-screen_name')[0].content;
+	
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 GM 0074";
+	pb_version = "v1.5 GM 0076";
 	pb_active_group = null;
 
 	//preference values
@@ -213,8 +214,13 @@ function pb_init()
 	{
 		master_fav = document.createElement('a');
 		master_fav.className = "fav-action";
-		master_reply = document.createElement('a');
+		master_reply = document.createElement('span');
 		master_reply.className = "reply";
+		var master_reply_reply_icon = document.createElement('span');
+			master_reply_reply_icon.className = "reply-icon icon";
+		var master_reply_link = document.createElement('a');
+		master_reply_reply_icon.appendChild(master_reply_link);
+		master_reply.appendChild(master_reply_reply_icon);
 	}
 
 	pb_snip_url = document.createElement('span');
@@ -349,11 +355,24 @@ function pbtweet_main(target)
 					{	// search tweet
 						entry[i].getElementsByClassName('msgtxt')[0].innerHTML = pb_link_maker(entry[i].getElementsByClassName('msgtxt')[0].innerHTML,'main');					
 					}
-
 					pb_snip_retreiver(entry[i]);
 					twitpic_thumb(entry[i].id,entry[i].innerHTML);
 					pb_extra_set(entry[i]);
 					pb_appearance_set(entry[i]);
+
+					if(entry[i].getElementsByClassName('reply')[0])
+					{
+//						window.console.log += '\n' + entry[i].id;
+						entry[i].getElementsByClassName('reply')[0].getElementsByTagName('a')[0].addEventListener(
+							"click",
+							function(event)
+							{
+								pb_reply(event);
+								event.preventDefault();
+							},
+							true
+						); // to assign reply code on original reply button.
+					}
 				}
 				var meta_url_list = entry[i].getElementsByClassName('meta')[0].getElementsByTagName('a');
 				var get_url = "";
@@ -496,8 +515,9 @@ function retreve_data( get_url , my_node , count )
 			//var conv_path = location.href.match(/.+\/\/twitter.com(\/[^\/]+)/)[1];
 			var conv_path = 'http://twitter.com/';
 			var href_match = /.+\:\/\/twitter\.com\/(.+)\/status\/([0-9]+)/;
-			conv_reply.href = conv_path + "?status=@" + conv_meta.match(href_match)[1] + "%20&amp;in_reply_to_status_id=" + conv_meta.match(href_match)[2] + "&amp;in_reply_to=" + conv_meta.match(href_match)[1];
-			conv_reply.title = "reply to " + conv_meta.match(href_match)[1];
+			conv_reply.getElementsByTagName('a')[0].href = conv_path + "?status=@" + conv_meta.match(href_match)[1] + "%20&amp;in_reply_to_status_id=" + conv_meta.match(href_match)[2] + "&amp;in_reply_to=" + conv_meta.match(href_match)[1];
+			conv_reply.getElementsByTagName('a')[0].title = "reply to " + conv_meta.match(href_match)[1];
+			//window.console.log += conv_reply.getElementsByTagName('a')[0].href;
 			conv_fav.id = "status_star_" + conv_meta.match(href_match)[2];
 
 			conv_reply.className = "pb-reply";
@@ -510,15 +530,15 @@ function retreve_data( get_url , my_node , count )
 			conv_chain.insertBefore(conv_action, conv_baloon.nextSibling);
 
 			//add reply function
-			conv_reply.name = conv_reply.href;
+			conv_reply.getElementsByTagName('a')[0].name = conv_reply.getElementsByTagName('a')[0].href;
 			if( document.body.id.match(/home|replies|favorites|search/) )
 			{
 				// home
-				conv_reply.removeAttribute("href");
-				conv_reply.addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, false);
+				//conv_reply.getElementsByTagName('a')[0].removeAttribute("href");
+				conv_reply.getElementsByTagName('a')[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, false);
 			} else {
-				conv_reply.href = conv_reply.href.replace(/twitter.com\/(timeline\/)*[^\?]+/, "twitter.com/$1home");
-				conv_reply.href = conv_reply.href.replace(/&amp;/g, "&");
+				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/twitter.com\/(timeline\/)*[^\?]+/, "twitter.com/$1home");
+				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/&amp;/g, "&");
 			}
 			
 			//add fave event
@@ -851,7 +871,10 @@ var update_span = 60000;
 var update_object = {};
 var purge_expression = /public_timeline/;
 
-if(!location.href.match(purge_expression))setInterval(function(){insert_update()}, update_span);
+if( auto_update == true )
+{
+	if(!location.href.match(purge_expression))setInterval(function(){insert_update()}, update_span);
+}
 
 function insert_update()
 {
@@ -950,7 +973,7 @@ function insert_update()
 				{
 					//add reply function
 					try{
-						updated_entry.getElementsByClassName("reply")[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault()}, false);
+						//updated_entry.getElementsByClassName("reply")[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault()}, false);
 					} catch(err){
 					}
 					//add face event
@@ -1480,12 +1503,13 @@ function pb_changelang(event)
 // reply function
 function pb_reply(event)
 {
+				//window.console.log += event;
 	var target = event.target;
+				//window.console.log += target;
 	var msg_body = "";
 	var my_in_reply_to_url = "";
 
 	var elm = document.getElementById("status");
-
 	switch(event.target.className)
 	{
 		case "pb-rtweet":
@@ -1512,12 +1536,45 @@ function pb_reply(event)
 			elm.value = "@" + reply_to + " " + elm.value;
 			break;
 		default:
-			var in_reply_to_url = target.name;
+			if(!target.href)
+			{
+				var in_reply_to_url = target.name;
+			}
+			else
+			{
+				var in_reply_to_url = target.href;
+			}
 			var reply_to = in_reply_to_url.match(/in\_reply\_to\=(.+)$/)[1];
 			var my_in_reply_to_url = in_reply_to_url.match(/status\_id\=([0-9]+)\&/)[1];
 			var id_remover = new RegExp("\@" + reply_to + "\ ");
 			elm.value = elm.value.replace(id_remover,"");
 			elm.value = "@" + reply_to + " " + elm.value;
+			if(event.shiftKey)
+			{
+				var user_account_regexp = /\@[a-zA-Z0-9\_]+/g;
+				if(target.href)
+ 				{
+ 					var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+ 				}
+ 				else
+ 				{
+					var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+				}
+				var additional_reply_list = original_message.match( user_account_regexp );
+				for(var i = 0 ; i < additional_reply_list.length ; i ++)
+				{
+					var adding_user_name = additional_reply_list[i].match(/\@(.+)/)[1];
+					var is_user_exist = new RegExp("@" + adding_user_name, "g");
+					if( adding_user_name != session_id && !elm.value.match(is_user_exist) )
+					{
+						elm.value += additional_reply_list[i] + " ";
+					}
+				}
+			}
+			else
+			{
+				//window.console.log( "" );
+			}
 	}
 	
 	document.getElementById("in_reply_to_status_id").value = my_in_reply_to_url;
@@ -2266,8 +2323,8 @@ function pb_css_set()
 		img.twitpic_thumb:hover {-moz-transform: translate(490px, -30px) scale(1) rotate(0deg);}
 		div.conv_chain .actions, body#show div.conv_chain .actions {display:inline; visibility: hidden;padding-top:4px ; float:right; width:14px;line-height:0.8em; position:inherit;margin-right:10px;}
 		div.conv_chain:hover .actions, body#show div.conv_chain:hover .actions {visibility: visible;}
-		div.conv_chain .actions .pb-reply {padding:4px 6px; background-image: url(http://static.twitter.com/images/icon_reply.gif);}
-		div.conv_chain .actions .pb-fav-action {padding:4px 6px;}
+		div.conv_chain .actions .pb-reply {display:block;padding:4px 6px; background-position: 50% 50%; background-repeat:no-repeat; background-image: url(http://static.twitter.com/images/icon_reply.gif);}
+		div.conv_chain .actions .pb-fav-action {display:block;padding:4px 6px;background-position: 50% 50%; background-repeat:no-repeat;}
 		span.pb-extra span {display:inline-block;box-sizing: content-box; height: 14px; font-size: 10px ;cursor:pointer; margin:0px 3px 5px 3px;padding:1px 6px;border:1px solid #cccccc; -moz-border-radius: 4px;background:#eee;}
 		li.status span.pb-extra, div.conv_chain span.pb-extra {opacity: 0;}
 		li.status:hover span.status-body span.meta span.pb-extra, div.conv_chain:hover span.pb-extra {opacity: 1;}
