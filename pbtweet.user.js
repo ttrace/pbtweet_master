@@ -1645,7 +1645,7 @@ function shorten_url(target)
 		{
 			var url_detection_regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?\s/g;	
 		}
-		var shorten_url_detector = /bit\.ly|j.mp|tinyurl\.com|is\.gd|turl\/nl|ff\/.im\/|twitpic\.com|twitvid\.com|pic\.gd|movapic\.com|yfrog\.com|www\.bcphotoshare\.com|bkite\.com|tiny12\.com|tumblr\.com|flic\.kr|www\.flickr\.com|bctiny\.com|f\.hatena\.ne\.jp/;
+		var shorten_url_detector = /bit\.ly|j.mp|tinyurl\.com|is\.gd|turl\/nl|ff\/.im\/|twitpic\.com|twitvid\.com|pic\.gd|movapic\.com|yfrog\.com|www\.bcphotoshare\.com|bkite\.com|tiny12\.com|tumblr\.com|flic\.kr|www\.flickr\.com|bctiny\.com|f\.hatena\.ne\.jp|www.youtube.com\/watch\?v\=[a-zA-Z0-9\_]{8,15}/;
 		var match_url = original_string.match(url_detection_regexp);
 		if(match_url)
 		{
