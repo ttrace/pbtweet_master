@@ -355,6 +355,8 @@ function pbtweet_main(target)
 					{	// search tweet
 						entry[i].getElementsByClassName('msgtxt')[0].innerHTML = pb_link_maker(entry[i].getElementsByClassName('msgtxt')[0].innerHTML,'main');					
 					}
+					
+					var meta_url_list = entry[i].getElementsByClassName('meta')[0].getElementsByTagName('a');
 					pb_snip_retreiver(entry[i]);
 					twitpic_thumb(entry[i].id,entry[i].innerHTML);
 					pb_extra_set(entry[i]);
@@ -362,7 +364,7 @@ function pbtweet_main(target)
 
 					if(entry[i].getElementsByClassName('reply')[0])
 					{
-//						window.console.log += '\n' + entry[i].id;
+						window.console.log += '\n' + entry[i].id;
 						entry[i].getElementsByClassName('reply')[0].getElementsByTagName('a')[0].addEventListener(
 							"click",
 							function(event)
@@ -380,7 +382,7 @@ function pbtweet_main(target)
 				for( var k = 1 ; k < meta_url_list.length ; k++ )
 				{
 					// searching in_reply_to_status_id urls.
-					if( meta_url_list[k].href.match(/\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+/) )
+					if( meta_url_list[k].href.match(/^http\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+$/) )
 						{
 							get_url = meta_url_list[k].href;
 							break;
@@ -448,7 +450,7 @@ function retreve_data( get_url , my_node , count )
 				conv_mine = " mine";
 			}
 			var url_replace = /\:\/\/twitter\.com\/[^\/]+\/status\/[0-9]+\"\>in\ reply\ to/;
-			var conv_innerHTML = "<span class = \'icons\'><a href='"+ window.location.protocol + "//twitter.com/" + user_name + "'><img src ='" + profile_image_url + "'></a></span><span class=\'entry-content " + user_name + conv_mine + "\'><strong>" + "<a href='" + window.location.protocol + "//twitter.com/" + user_name + "' title='" + conv_object["user"]["name"] + "'>" +user_name + "</a> </strong>" + pb_link_maker(conv_object["text"]) + "</span>";
+			var conv_innerHTML = "<span class = \'icons\'><a href='"+ window.location.protocol + "//twitter.com/" + user_name + "'><img src ='" + profile_image_url + "'></a></span><span class=\'entry-content " + user_name + conv_mine + "\'><strong>" + "<a href='" + window.location.protocol + "//twitter.com/" + user_name + "' title='" + user_name + "'>" +user_name + "</a> </strong>" + pb_link_maker(conv_object["text"]) + "</span>";
 			if(conv_object["in_reply_to_status_id"]){
 				var retreve_status = window.location.protocol + "//twitter.com/" + conv_object["in_reply_to_screen_name"] + "/status/" + conv_object["in_reply_to_status_id"];
 				//retreve_data(retreve_status,my_node);
@@ -535,7 +537,7 @@ function retreve_data( get_url , my_node , count )
 			{
 				// home
 				//conv_reply.getElementsByTagName('a')[0].removeAttribute("href");
-				conv_reply.getElementsByTagName('a')[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, false);
+				conv_reply.getElementsByTagName('a')[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, true);
 			} else {
 				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/twitter.com\/(timeline\/)*[^\?]+/, "twitter.com/$1home");
 				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/&amp;/g, "&");
@@ -658,6 +660,7 @@ function twitpic_thumb(id,html)
 		my_source = document.getElementById(id).childNodes[0].childNodes[0].innerHTML;
 	}
 	var twitpic_carrier = /(http\:\/\/twitpic.com\/[a-zA-Z0-9]+)/;
+	var pikchur_carrier = /(http\:\/\/pk.gd\/([a-zA-Z0-9]+))/;
 	var twitvid_carrier = /(http\:\/\/twitvid.com\/[a-zA-Z0-9]+)/;
 	var tweetphoto_carrier = /http\:\/\/pic\.gd\/([a-zA-Z0-9]+)/;
 	var movapic_carrier = /\"(http\:\/\/movapic.com\/pic\/([^\"]+))/;
@@ -676,6 +679,12 @@ function twitpic_thumb(id,html)
 		var pic_thumb_src = my_source.match(twitpic_carrier)[1].replace(/http\:\/\/twitpic\.com\/([0-9a-zA-Z0-9]+)/,"http://twitpic.com/show/thumb/$1");
 		place_picture(id,pic_thumb_src,my_source.match(twitpic_carrier)[1]);
 	}
+	//pikchur support
+	if(my_source.match(pikchur_carrier)){
+		var pic_thumb_src = "http://img.pikchur.com/pic_" + my_source.match(pikchur_carrier)[2] + "_s.jpg?ls=";
+		place_picture(id,pic_thumb_src,my_source.match(pikchur_carrier)[1]);
+	}
+
 	//twitvid support
 	if(my_source.match(twitvid_carrier)){
 		var pic_thumb_src = my_source.match(twitvid_carrier)[1].replace(/http\:\/\/twitvid\.com\/([0-9a-zA-Z0-9]+)/,"http://cdn.twitvid.com/thumbnails/$1.jpg");
@@ -1503,13 +1512,44 @@ function pb_changelang(event)
 // reply function
 function pb_reply(event)
 {
-				//window.console.log += event;
+				//window.console.log += event.shiftkey;
 	var target = event.target;
-				//window.console.log += target;
+				//window.console.log += event.target.href;
 	var msg_body = "";
 	var my_in_reply_to_url = "";
 
-	var elm = document.getElementById("status");
+	if(document.getElementById("status"))
+	{	//post area contains
+		var elm = document.getElementById("status");
+	}
+	else if(event.shiftKey && !document.getElementById("status"))
+	{
+		var user_account_regexp = /\@[a-zA-Z0-9\_]+/g;
+		if(target.href)
+		{
+			var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+		}
+		else
+		{
+			var original_message = pb_link_remover(target.parentNode.parentNode.parentNode.getElementsByClassName('entry-content')[0]);
+		}
+		var additional_reply_list = original_message.match( user_account_regexp );
+		var adding_user_name = "";
+		for(var i = 0 ; i < additional_reply_list.length ; i ++)
+		{
+			adding_user_name = additional_reply_list[i].match(/\@([a-zA-Z0-9_]+)/)[1];
+			var is_user_exist = new RegExp("@" + adding_user_name, "g");
+			var adding_user_string = "";
+			if( adding_user_name != session_id && !target.href.match(is_user_exist) )
+			{
+				adding_user_string += additional_reply_list[i] + "%20";
+			}
+		}
+		var reply_URL = "http://twitter.com/?status=" + target.href.match(/status\=(@[a-zA-Z0-9_]+)/)[1] +"%20" + adding_user_string + target.href.match(/status\=(@[a-zA-Z0-9_]+)(.+)/)[2];
+		location.href = reply_URL;
+		return(true);
+	}
+	
 	switch(event.target.className)
 	{
 		case "pb-rtweet":
@@ -1567,7 +1607,14 @@ function pb_reply(event)
 					var is_user_exist = new RegExp("@" + adding_user_name, "g");
 					if( adding_user_name != session_id && !elm.value.match(is_user_exist) )
 					{
-						elm.value += additional_reply_list[i] + " ";
+						//if(!elm.href)
+						//{
+							elm.value += additional_reply_list[i] + " ";
+						//}
+						//else
+						//{
+						//	elm.href.replace(/http\:\/\/twitter\.com\/\?status\=@[a-zA-Z0-9]+(\%20)/, additional_reply_list[i] + "%20");
+						//}
 					}
 				}
 			}
@@ -1662,7 +1709,7 @@ function shorten_url(target)
 		{
 			var url_detection_regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?\s/g;	
 		}
-		var shorten_url_detector = /bit\.ly|j.mp|tinyurl\.com|is\.gd|turl\/nl|ff\/.im\/|twitpic\.com|twitvid\.com|pic\.gd|movapic\.com|yfrog\.com|www\.bcphotoshare\.com|bkite\.com|tiny12\.com|tumblr\.com|flic\.kr|www\.flickr\.com|bctiny\.com|f\.hatena\.ne\.jp/;
+		var shorten_url_detector = /bit\.ly|j.mp|tinyurl\.com|is\.gd|turl\/nl|ff\/.im\/|twitpic\.com|twitvid\.com|pic\.gd|movapic\.com|yfrog\.com|www\.bcphotoshare\.com|bkite\.com|tiny12\.com|tumblr\.com|flic\.kr|www\.flickr\.com|bctiny\.com|f\.hatena\.ne\.jp|www.youtube.com\/watch\?v\=[a-zA-Z0-9\_]{8,15}/;
 		var match_url = original_string.match(url_detection_regexp);
 		if(match_url)
 		{
