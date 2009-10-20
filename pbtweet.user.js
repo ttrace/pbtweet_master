@@ -528,7 +528,7 @@ function retreve_data( get_url , my_node , count )
 			{
 				// home
 				//conv_reply.getElementsByTagName('a')[0].removeAttribute("href");
-				conv_reply.getElementsByTagName('a')[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, false);
+				conv_reply.getElementsByTagName('a')[0].addEventListener("click", function(e){pb_reply(e);e.preventDefault();e.stopPropagation}, true);
 			} else {
 				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/twitter.com\/(timeline\/)*[^\?]+/, "twitter.com/$1home");
 				conv_reply.getElementsByTagName('a')[0].href = conv_reply.getElementsByTagName('a')[0].href.replace(/&amp;/g, "&");
@@ -1505,7 +1505,7 @@ function pb_reply(event)
 	{	//post area contains
 		var elm = document.getElementById("status");
 	}
-	else if(event.shiftKey)
+	else if(event.shiftKey && !document.getElementById("status"))
 	{
 		var user_account_regexp = /\@[a-zA-Z0-9\_]+/g;
 		if(target.href)
