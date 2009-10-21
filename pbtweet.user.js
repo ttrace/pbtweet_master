@@ -871,7 +871,10 @@ var update_span = 60000;
 var update_object = {};
 var purge_expression = /public_timeline/;
 
-if(!location.href.match(purge_expression))setInterval(function(){insert_update()}, update_span);
+if( auto_update == true )
+{
+	if(!location.href.match(purge_expression))setInterval(function(){insert_update()}, update_span);
+}
 
 function insert_update()
 {
