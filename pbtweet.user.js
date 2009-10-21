@@ -1,4 +1,4 @@
-//v1.5 GM 0076
+// v1.5 GM 0076
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -356,7 +356,7 @@ function pbtweet_main(target)
 						entry[i].getElementsByClassName('msgtxt')[0].innerHTML = pb_link_maker(entry[i].getElementsByClassName('msgtxt')[0].innerHTML,'main');					
 					}
 					
-					var meta_url_list = entry[i].getElementsByClassName('meta')[0].getElementsByTagName('a');
+					//var meta_url_list = entry[i].getElementsByClassName('meta')[0].getElementsByTagName('a');
 					pb_snip_retreiver(entry[i]);
 					twitpic_thumb(entry[i].id,entry[i].innerHTML);
 					pb_extra_set(entry[i]);
@@ -364,7 +364,7 @@ function pbtweet_main(target)
 
 					if(entry[i].getElementsByClassName('reply')[0])
 					{
-						window.console.log += '\n' + entry[i].id;
+						//window.console.log += '\n' + entry[i].id;
 						entry[i].getElementsByClassName('reply')[0].getElementsByTagName('a')[0].addEventListener(
 							"click",
 							function(event)
@@ -382,7 +382,7 @@ function pbtweet_main(target)
 				for( var k = 1 ; k < meta_url_list.length ; k++ )
 				{
 					// searching in_reply_to_status_id urls.
-					if( meta_url_list[k].href.match(/^http\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+$/) )
+					if( meta_url_list[k].href.match(/\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+/) )
 						{
 							get_url = meta_url_list[k].href;
 							break;
