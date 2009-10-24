@@ -1,4 +1,4 @@
-//v1.5 dev 0076
+//v1.5 dev 0078
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -29,7 +29,7 @@ function pb_init()
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 dev 0076";
+	pb_version = "v1.5 dev 0078";
 	pb_active_group = null;
 
 	//preference values
@@ -1213,7 +1213,7 @@ function pb_link_maker(string)
 
 function pb_snip_retreiver(target)
 {
-	var snipMatch = /^(http\:\/\/tinyurl\.com\/[^\/]+|http\:\/\/bit\.ly\/[a-zA-Z0-9]+|http\:\/\/j\.mp\/[a-zA-Z0-9]+|http\:\/\/is\.gd\/.+|http\:\/\/ff\.im\/\-.+|http\:\/\/twurl\.nl\/.+)/;
+	var snipMatch = /^(http\:\/\/(www\.)*tinyurl\.com\/[^\/]+|http\:\/\/(www\.)*bit\.ly\/[a-zA-Z0-9]+|http\:\/\/(www\.)*j\.mp\/[a-zA-Z0-9]+|http\:\/\/(www\.)*is\.gd\/.+|http\:\/\/(www\.)*ff\.im\/\-.+|http\:\/\/twurl\.nl\/.+)/;
 	var links = target.getElementsByClassName('entry-content')[0].getElementsByTagName('a');
 	for(var i = 0; i < links.length; i++)
 	{
@@ -1267,9 +1267,9 @@ function pb_snip_expander( target )
 {
 	var url_alias = target.getElementsByTagName('span')[0].name;
 //	var snip_pattern = /http\:\/\/bit\.ly\/.+|http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
-	var snip_pattern = /http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
-	var bitly_pattern = /(http\:\/\/(bit\.ly|j\.mp)\/[a-zA-Z0-9]+)[\+]?/;
-	var ffim_pattern = /http\:\/\/ff\.im\/\-.+/;
+	var snip_pattern = /http\:\/\/(www\.)*is\.gd\/.+|http\:\/\/(www\.)*twurl\.nl\/.+|http\:\/\/(www\.)*tinyurl\.com\/.+/;
+	var bitly_pattern = /(http\:\/\/(www\.)*(bit\.ly|j\.mp)\/[a-zA-Z0-9]+)[\+]?/;
+	var ffim_pattern = /http\:\/\/(www\.)*ff\.im\/\-.+/;
 	if( url_alias.match( snip_pattern ) )
 	{	//search twitter.com JSONP
 		var url_alias = url_alias;
