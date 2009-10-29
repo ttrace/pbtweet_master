@@ -2340,13 +2340,13 @@ function pb_css_set()
 	document.styleSheets[0].insertRule('img.twitpic_thumb:hover {-webkit-transform: translate(490px, -30px) scale(1) rotate(0deg);}',oLength+15);
 	document.styleSheets[0].insertRule('div.conv_chain .actions, body#show div.conv_chain .actions {display:inline; visibility: hidden;padding-top:4px ; float:right; width:14px;line-height:0.8em; position:inherit;}',oLength+16);
 	document.styleSheets[0].insertRule('div.conv_chain:hover .actions, body#show div.conv_chain:hover .actions {visibility: visible;}',oLength+17);
-	document.styleSheets[0].insertRule('div.conv_chain .actions .pb-reply {display:block;padding:4px 6px; background-position: 50% 50%; background-repeat:no-repeat; background-image: url(http://static.twitter.com/images/icon_reply.gif);}',oLength+18);
+	document.styleSheets[0].insertRule('div.conv_chain .actions .pb-reply {display:block;padding:4px 0px 4px 17px; margin-left: -24px; background-position: 2px 2px; background-repeat:no-repeat; background-image: url(http://static.twitter.com/images/icon_reply.gif); font-size: 0.764em;}',oLength+18);
 	document.styleSheets[0].insertRule('div.conv_chain .actions .pb-fav-action {display:block; cursor:pointer;background-position: -32px 0px; background-repeat:no-repeat; width:15px;height:15px;}',oLength+19);
 	document.styleSheets[0].insertRule('span.pb-extra span {display:inline-block;box-sizing: content-box; height: 14px; font-size: 10px ;cursor:pointer; margin:0px 3px 5px 3px;padding:1px 6px;border:1px solid #cccccc; -webkit-border-radius: 4px;background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); -webkit-transition:-webkit-box-shadow 0.1s ease-in, color 0.1s ease-in, background 0.1s ease-in;}',oLength+20);
 	document.styleSheets[0].insertRule('li.status span.pb-extra, div.conv_chain span.pb-extra {opacity: 0; -webkit-transition:opacity 0.3s ease-in;}',oLength+21);	
 	document.styleSheets[0].insertRule('li.status:hover span.status-body span.meta span.pb-extra, div.conv_chain:hover span.pb-extra {opacity: 1;}',oLength+22);
 	document.styleSheets[0].insertRule('span.pb-extra span:hover {-webkit-box-shadow:0px 2px 3px rgba(0, 0, 0, 0.5);color:#444;background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#ccc), color-stop(0.1, #fff));}',oLength+23);
-	document.styleSheets[0].insertRule('span.pb-extra {display:block;color:#ccc;position:absolute;width:190px;height:12px;margin-left:230px;margin-top:-12px; text-align:right;  font-style:normal; font-family:sans-serif;}',oLength+24);
+	document.styleSheets[0].insertRule('span.pb-extra {display:block;color:#ccc;position:absolute;width:190px;height:12px;margin-left:190px;margin-top:-12px; text-align:right;  font-style:normal; font-family:sans-serif;}',oLength+24);
 	document.styleSheets[0].insertRule('span.meta.entry-meta {margin-top:5px;}',oLength+25);
 	document.styleSheets[0].insertRule('ol.statuses li {opacity: 1}',oLength+26);
 	document.styleSheets[0].insertRule('#pb_panel {position:absolute;top:0px;left: -140px;z-index:9999; padding:4px;background:white; -webkit-box-shadow:0px 4px 8px #888;opacity: 0; -webkit-transform: scale(0.2, 0); -webkit-transition:-webkit-transform 0.2s ease-in, opacity 0.3s ease-in;-webkit-transform-origin:100% 0%}',oLength+27);
@@ -2410,6 +2410,9 @@ function pb_css_set()
 	document.styleSheets[0].insertRule('.Notifire div.icon {float : left ; padding : 5px;}',oLength+73);
 	document.styleSheets[0].insertRule('.Notifire img.icon { width : 30px ; height 30px }',oLength+74);
 	document.styleSheets[0].insertRule('.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}',oLength+75);
+
+	document.styleSheets[0].insertRule('.status-body ul.actions-hover { position:relative; left:48px; bottom: 16px; font-size: 0.764em; margin-bottom:-16px;}',oLength+76);
+	document.styleSheets[0].insertRule('#profile .status-body ul.actions-hover { left:88px;}',oLength+76);
 }
 
 
