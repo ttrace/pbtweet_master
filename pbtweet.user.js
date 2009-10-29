@@ -2325,7 +2325,7 @@ function pb_css_set()
 	document.styleSheets[0].insertRule('div.conv_chain {clear:both; text-align:left;margin: 5px 5px 4px 0px; padding:0px 0px 0px 0px;}',oLength);
 	document.styleSheets[0].insertRule('div.conv_chain div.thumb{width: 34px !important; height: 34px !important; position:relative !important;max-width:100px;}',oLength+1);
 	document.styleSheets[0].insertRule('div.conv_chain div.thumb img{vertical-align:top; margin-right:4px !important;width:60px !important;max-width:60px !important;height:32px !important;}',oLength+2);
-	document.styleSheets[0].insertRule('div.conv_chain span.icons{display:inline-block;margin-left:15px;text-align:center;padding:0px 0px 10px 0px;width:50px !important;max-width:50px !important;}',oLength+3);
+	document.styleSheets[0].insertRule('div.conv_chain span.icons {display:inline-block;margin-left:0px;text-align:center;padding:0px 0px 10px 0px;width:50px !important;max-width:50px !important;}',oLength+3);
 	document.styleSheets[0].insertRule('div.conv_chain span.icons img{max-width:40px;max-height:40px;}',oLength+4);
 	document.styleSheets[0].insertRule('div.conv_chain span.icons a:hover {text-underline: none;}',oLength+5);
 	document.styleSheets[0].insertRule('div.conv_chain span.entry-content, body#show #content div.conv_chain span.entry-content{display:block;width:400px;max-width:400px;min-height:24px;margin:0px 0px 0px 0px;padding:0px 12px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_02.png); background-repeat:repeat-y;}',oLength+6);
@@ -2412,7 +2412,7 @@ function pb_css_set()
 	document.styleSheets[0].insertRule('.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}',oLength+75);
 
 	document.styleSheets[0].insertRule('.status-body ul.actions-hover { position:relative; left:48px; bottom: 16px; font-size: 0.764em; margin-bottom:-16px;}',oLength+76);
-	document.styleSheets[0].insertRule('#profile .status-body ul.actions-hover { left:88px;}',oLength+76);
+	document.styleSheets[0].insertRule('#profile .status-body ul.actions-hover { left:88px;}',oLength+77);
 }
 
 
