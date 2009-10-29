@@ -30,7 +30,6 @@ function pb_init()
 
 	//information panel
 	pb_version = "v1.5 dev 0078";
-	pb_active_group = null;
 
 	//preference values
 	restore_pb_values();
@@ -129,7 +128,6 @@ function pb_init()
 	pb_info_panel();
 	if(document.getElementById('side'))
 	{
-		pb_group_tab();
 		remove_accesskey();
 	}
 	
@@ -172,13 +170,12 @@ function pb_init()
 					event.target.addEventListener("DOMNodeInserted", 
 					function (event)
 					{
-						if(event.target.nodeName == "LI" && (pb_is_in_group(event.target) == false))
+						if(event.target.nodeName == "LI")
 						{
 							event.target.style.opacity = '1';
 							event.target.style.marginTop = '0px';
 							event.target.style.webkitTransition = "";
 							removeClass(event.target, 'animate');
-							addClass(event.target, 'pbHiddenGroup');
 							pbtweet_main([event.target]);
 						}
 						else
@@ -281,22 +278,11 @@ function pb_add_eventlistener_to_timeline(timeline)
 	document.getElementById("timeline").addEventListener("DOMNodeInserted", 
 		function (event)
 		{
-			if(event.target.nodeName == "LI" && (pb_is_in_group(event.target) == false))
+			if(event.target.nodeName == "LI" &&  (!hasClass(event.target, "animate")))
 			{
-				event.target.style.opacity = '1';
-				event.target.style.marginTop = '0px';
-				removeClass(event.target, 'animate');
-				addClass(event.target, 'pbHiddenGroup');
 				pbtweet_main([event.target]);
-			}
-			else
-			{
-				if(event.target.nodeName == "LI" &&  (!hasClass(event.target, "animate")))
-				{
-					pbtweet_main([event.target]);
-				} else if(event.target.nodeName == "LI") {
-					kick_animation_on_top(event);
-				}
+			} else if(event.target.nodeName == "LI") {
+				kick_animation_on_top(event);
 			}
 		}, false);
 }
@@ -619,28 +605,6 @@ function remove_redundand(target_id)
 		var remove_target = document.getElementById(target_id);
 		remove_target.style.display = "none"
 		//remove_target.parentNode.removeChild(remove_target);
-	}
-}
-
-function hide_group(target_id)
-{
-	try
-	{
-		var remove_target = document.getElementById(target_id);
-		if(arguments[2])
-		{	// group on_off
-		}
-		setTimeout(function()
-		{
-			if(!hasClass(remove_target,'pbHiddenGroup'))
-			{
-				addClass(remove_target, ' pbHiddenGroup ');
-				removeClass(remove_target, 'pbHiddingGroup')
-			}
-		}, 400);
-		//remove_target.parentNode.removeChild(remove_target);
-	} catch(e) {
-		//window.console.log = window.console.log + '\n' + e + 'on removing';
 	}
 }
 
@@ -1933,194 +1897,6 @@ Notifire.prototype =
 	} ,
 }
 
-function pb_group_tab()
-{	//create group
-	var pb_hr = document.createElement('hr');
-
-	var pb_group_wrapper = document.createElement('div');
-		pb_group_wrapper.id = 'pb-group';
-		pb_group_wrapper.className = 'collapsible';
-	var pb_group_title = document.createElement('h2');
-		pb_group_title.className = 'sidebar-title';
-		pb_group_title.innerHTML = '<span>Groups</span>';
-	var pb_group_list = document.createElement('ul');
-		pb_group_list.className = 'sidebar-menu';
-	var pb_group_add_button = document.createElement('a');
-		pb_group_add_button.className = 'xref';
-		pb_group_add_button.innerHTML = 'add';
-	pb_group_list.appendChild( pb_group_add_button );
-	pb_group_title.appendChild( pb_group_add_button );
-
-	pb_group_wrapper.appendChild(pb_group_title);
-	pb_group_wrapper.appendChild(pb_group_list);
-	pb_group_wrapper.appendChild( pb_hr );
-	pb_group_add_button.addEventListener('click', function(e){pb_add_group(e.target.parentNode);e.stopPropagation;e.preventDefault()}, false);
-	document.getElementById('side').insertBefore( pb_group_wrapper, document.getElementById('rssfeed'));
-	document.getElementById( 'following' ).appendChild( pb_hr );
-}
-
-function pb_grouping(group)
-{	//
-	if(pb_active_group != group || arguments[1] == 'keep')
-	{
-		removeClass(pb_active_group, 'pbActiveGroup');
-		pb_active_group = group;
-		var elements = document.getElementById('timeline').getElementsByClassName('hentry');
-		var group_list = group.getElementsByClassName('vcard');
-		var isInGroup = new RegExp(group.inGroup);
-		//alert(isInGroup);
-		for(var i = 0; i < elements.length; i++)
-		{
-			var target_u_name = elements[i].className.match(/u-([a-zA-Z0-9\_\-]+)/)[1];
-			if(target_u_name.match(isInGroup))
-			{
-				removeClass(elements[i], 'pbHiddenGroup');				
-			}
-			else
-			{
-				hide_group(elements[i].id, '', i * 200);
-			}
-		}
-		addClass(group, 'pbActiveGroup');
-	}
-	else
-	{
-		setTimeout(function(){pb_remove_grouping()}, 100);
-	}
-}
-
-function pb_in_group_regexp(group)
-{
-	var regrep_string = '';
-	var group_list = group.getElementsByClassName('vcard');
-	for(var j = 0; j < group_list.length; j++)
-	{
-		var g_name = group_list[j].getElementsByClassName('url')[0].href.replace(/.+twitter.com\/(.+)/, '$1');
-		regrep_string = regrep_string + '|^' + g_name + '$';
-	}
-	var return_regExp = new RegExp(regrep_string.replace(/^\|/, ''));
-	return return_regExp;
-}
-
-function pb_is_in_group(target)
-{
-	var is_in_group = true;
-	if(pb_active_group != null)
-	{
-		is_in_group = false;
-		var target_u_name = target.className.match(/u\-([a-zA-Z0-9\_\-]+)/)[1];
-		var group_list = pb_active_group.getElementsByClassName('vcard');
-		for(var j = 0; j < group_list.length; j++)
-		{
-			var g_name = group_list[j].getElementsByClassName('url')[0].href.replace(/.+twitter.com\/(.+)/, '$1');
-			if(target_u_name == g_name)
-			{
-				is_in_group = true;
-				break;
-			}
-		}
-	}
-	return(is_in_group);
-}
-
-function pb_remove_grouping()
-{
-	var group = pb_active_group;
-	removeClass(group, 'pbActiveGroup');
-	var elements = document.getElementById('timeline').getElementsByClassName('hentry');
-	for(var i = 0; i < elements.length; i++)
-	{
-		var target_id = elements[i].id;
-		setTimeout(function()
-		{
-			pb_removing_timer(target_id)
-		}, i*100);
-	}
-	pb_active_group = null;
-}
-
-function pb_removing_timer( target_id )
-{
-	var target = document.getElementById(target_id);
-		removeClass(target, 'pbHiddenGroup');
-}
-
-function pb_add_group(wrapper)
-{
-	var insert_point = wrapper;
-	var pb_group = document.createElement('li');
-		pb_group.className = 'link-title' ;
-	var pb_group_button = document.createElement('a');
-		pb_group_button.href = '#';
-		pb_group_button.innerHTML = '<span>Group</span>';
-	var pb_add_member_to_group_button = document.createElement('span');
-		pb_add_member_to_group_button.innerHTML = '+';
-		pb_add_member_to_group_button.className = 'pb-group-action';
-	pb_group_button.getElementsByTagName('span')[0].appendChild(pb_add_member_to_group_button);
-	pb_group_button.addEventListener('click', function(e){pb_grouping(pb_group);e.stopPropagation();e.preventDefault()}, false);
-	pb_add_member_to_group_button.addEventListener('click', function(e){pb_add_member_to_group_panel(pb_group);e.preventDefault();e.stopPropagation()}, true);
-	pb_group.appendChild(pb_group_button);
-	insert_point.parentNode.getElementsByClassName('sidebar-menu')[0].appendChild(pb_group);
-	pb_add_member_to_group_panel(pb_group);
-	//return pb_group;
-}
-
-function pb_add_member_to_group(target)
-{
-	var target = target;
-	var vcard_container = target.getElementsByClassName('following')[0];
-	if( !vcard_container )
-	{
-		var pb_group_vcards = document.createElement('div');
-			pb_group_vcards.className = 'following' ;
-		target.appendChild(pb_group_vcards);
-		var vcard_container = pb_group_vcards;
-	}
-
-	if( arguments[1] != '' )
-	{
-		var u_name_list = arguments[1].split(/[^0-9a-zA-Z\-\_]+/);
-		for( var i = 0 ; i < u_name_list.length ; i++ )
-		{
-			setTimeout( vcard_container.appendChild( vcard_builder( u_name_list[i] ) ) , 100 );
-		}
-		target.inGroup = pb_in_group_regexp(target);
-		//pb_grouping(target,'keep');
-	}
-	pb_add_member_panel_close(target.getElementsByClassName('pb-add-group')[0]);
-}
-
-function pb_add_member_to_group_panel(target_group)
-{
-	if(!target_group.getElementsByClassName('pb-add-group')[0])
-	{	// Group should open once.
-		var input_field_wrapper = document.createElement('div');
-			input_field_wrapper.className = 'pb-add-group';
-		var input_field = document.createElement('input');
-			input_field.className = 'uname';
-		var add_button = document.createElement('input');
-			add_button.type = 'button';
-			add_button.value = 'Add';
-		var cancel_button = document.createElement('input');
-			cancel_button.type = 'button';
-			cancel_button.value = 'Cancel';
-	
-			input_field_wrapper.appendChild(input_field);
-			input_field_wrapper.appendChild(cancel_button);
-			input_field_wrapper.appendChild(add_button);
-		
-		add_button.addEventListener('click', function(e){pb_add_member_to_group(target_group, input_field.value);e.stopPropagation()}, false);
-		cancel_button.addEventListener('click', function(e){pb_add_member_panel_close(input_field_wrapper);e.stopPropagation()}, false);
-		target_group.appendChild(input_field_wrapper); 
-	}
-}
-
-function pb_add_member_panel_close(target)
-{
-	var target = target;
-	target.parentNode.removeChild(target);
-}
-
 function vcard_builder(uname)
 {	// current, text vcard
 	var userinfo = fetch_user_info(uname);
@@ -2147,11 +1923,6 @@ function vcard_builder(uname)
 	{
 		return(null);	
 	}
-}
-
-function vcard_append( userinfo , target )
-{
-
 }
 
 function fetch_user_info(uname)
@@ -2390,29 +2161,20 @@ function pb_css_set()
 
 	document.styleSheets[0].insertRule('body#profile ol.statuses .latest-status .conv_chain .entry-baloon .entry-content {font-size: 1em;}',oLength+57);
 
-	document.styleSheets[0].insertRule('ul.sidebar-menu li a span.pb-group-action {float:right;width:10px;}',oLength+58);
-	document.styleSheets[0].insertRule('ol.statuses li.status.pbHiddingGroup {-webkit-transform: scale(1, 0);}',oLength+59);
-	document.styleSheets[0].insertRule('ol.statuses li.status.pbHiddenGroup, ol.statuses li.status.pbInConv {display:none;}',oLength+60);
-	document.styleSheets[0].insertRule('.pbActiveGroup {background-color:white !important;}',oLength+61);
-	document.styleSheets[0].insertRule('div#pb-group span.vcard {padding : 0px 3px 2px 1px;}',oLength+62);
-	document.styleSheets[0].insertRule('div#pb-group li span.vcard a.url { display : inline ; background-color:transparent !important; padding: 0px;}',oLength+63);
-	document.styleSheets[0].insertRule('.pb-add-group input.uname {display:block; width: 157px;margin:1px 14px; padding:1px 2px;}',oLength+64);
-	document.styleSheets[0].insertRule('.pb-add-group {display:block; margin:1px 3px; padding-right:14px; text-align:right;}',oLength+65);
-	document.styleSheets[0].insertRule('div#pb-group .following { padding: 5px 10px 5px 14px; }',oLength+66);
-	document.styleSheets[0].insertRule('.xref {margin-left:5px;}',oLength+67);
+	document.styleSheets[0].insertRule('.xref {margin-left:5px;}',oLength+58);
 
-	document.styleSheets[0].insertRule('.conv-read-more {padding : 4px; font-size : 12px; text-align: center; font-weight:bold; color: #999; cursor:pointer; border: 1px solid #ccc; -webkit-border-radius: 4px; background-color: white; background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); background-repeat : no-repeat; background-position: center;}',oLength+68);
-	document.styleSheets[0].insertRule('.conv-read-more:hover {color: #555; cursor:pointer; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4)}',oLength+69);
+	document.styleSheets[0].insertRule('.conv-read-more {padding : 4px; font-size : 12px; text-align: center; font-weight:bold; color: #999; cursor:pointer; border: 1px solid #ccc; -webkit-border-radius: 4px; background-color: white; background:-webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); background-repeat : no-repeat; background-position: center;}',oLength+59);
+	document.styleSheets[0].insertRule('.conv-read-more:hover {color: #555; cursor:pointer; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4)}',oLength+60);
 
-	document.styleSheets[0].insertRule('.Notifire { margin-left: 13px; margin-top: 10px; width: 450px ; min-height: 40px; clear : both ; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4) ; -webkit-border-radius : 8px ; opacity : 0 ; -webkit-transform : translate( 0px , -20px) ; -webkit-transform-origin : 50% 50% ; -webkit-transition : -webkit-transform 0.2s ease-in , opacity 0.4s ease-in ;}',oLength+70);
-	document.styleSheets[0].insertRule('#notifire_canvas .Notifire-popon { opacity : 1 ; -webkit-transform : translate( 0px , 0px ) ; }',oLength+71);
-	document.styleSheets[0].insertRule('#notifire_canvas .Notifire-pushout {  opacity : 0 ; }',oLength+72);
-	document.styleSheets[0].insertRule('.Notifire div.icon {float : left ; padding : 5px;}',oLength+73);
-	document.styleSheets[0].insertRule('.Notifire img.icon { width : 30px ; height 30px }',oLength+74);
-	document.styleSheets[0].insertRule('.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}',oLength+75);
+	document.styleSheets[0].insertRule('.Notifire { margin-left: 13px; margin-top: 10px; width: 450px ; min-height: 40px; clear : both ; -webkit-box-shadow: 0px 4px 4px rgba(0%, 0%, 0%, 0.4) ; -webkit-border-radius : 8px ; opacity : 0 ; -webkit-transform : translate( 0px , -20px) ; -webkit-transform-origin : 50% 50% ; -webkit-transition : -webkit-transform 0.2s ease-in , opacity 0.4s ease-in ;}',oLength+61);
+	document.styleSheets[0].insertRule('#notifire_canvas .Notifire-popon { opacity : 1 ; -webkit-transform : translate( 0px , 0px ) ; }',oLength+62);
+	document.styleSheets[0].insertRule('#notifire_canvas .Notifire-pushout {  opacity : 0 ; }',oLength+63);
+	document.styleSheets[0].insertRule('.Notifire div.icon {float : left ; padding : 5px;}',oLength+64);
+	document.styleSheets[0].insertRule('.Notifire img.icon { width : 30px ; height 30px }',oLength+65);
+	document.styleSheets[0].insertRule('.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}',oLength+66);
 
-	document.styleSheets[0].insertRule('.status-body ul.actions-hover { position:relative; left:48px; bottom: 16px; font-size: 0.764em; margin-bottom:-16px;}',oLength+76);
-	document.styleSheets[0].insertRule('#profile .status-body ul.actions-hover { left:88px;}',oLength+77);
+	document.styleSheets[0].insertRule('.status-body ul.actions-hover { position:relative; left:48px; bottom: 16px; font-size: 0.764em; margin-bottom:-16px;}',oLength+67);
+	document.styleSheets[0].insertRule('#profile .status-body ul.actions-hover { left:88px;}',oLength+68);
 }
 
 
