@@ -1,4 +1,4 @@
-// v1.5 GM 0076
+// v1.5 GM 0080
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -32,7 +32,7 @@ function pb_init()
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 GM 0076";
+	pb_version = "v1.5 GM dev 0080";
 	pb_active_group = null;
 
 	//preference values
@@ -132,7 +132,6 @@ function pb_init()
 	pb_info_panel();
 	if(document.getElementById('side'))
 	{
-		//pb_group_tab();
 		remove_accesskey();
 	}
 	
@@ -175,13 +174,12 @@ function pb_init()
 					event.target.addEventListener("DOMNodeInserted", 
 					function (event)
 					{
-						if(event.target.nodeName == "LI" && (pb_is_in_group(event.target) == false))
+						if(event.target.nodeName == "LI")
 						{
 							event.target.style.opacity = '1';
 							event.target.style.marginTop = '0px';
 							event.target.style.webkitTransition = "";
 							removeClass(event.target, 'animate');
-							addClass(event.target, 'pbHiddenGroup');
 							pbtweet_main([event.target]);
 						}
 						else
@@ -247,27 +245,6 @@ function pb_init()
  				}, 1)
  			},true);
  		}
- 		var page_type = document.getElementById('side').getElementsByClassName('active')[0];
- 		switch (page_type.id)
- 		{
- 			case "home_tab":
- 				var update_target = document.getElementById('home_tab');
- 				break;
- 			case "replies_tab":
- 				var update_target = document.getElementById('replies_tab');
- 				break;
- 			case "favorites_tab":
- 				var update_target = document.getElementById('favorites_tab');
- 				break;
-  			case "profile_tab":
- 				var update_target = document.getElementById('updates_tab');
- 				break;
-  			case "update_tab":
- 				var update_target = document.getElementById('update_tab');
- 				break;
- 			default:
-  				//var update_target = document.createElement('div');
- 		}
 		pbtweet_main(document.getElementById('timeline').getElementsByClassName('hentry')); //initial
 	 } else {
 		pbtweet_main(document.getElementById('permalink').getElementsByClassName('hentry')); //initial for status page	 
@@ -284,22 +261,11 @@ function pb_add_eventlistener_to_timeline(timeline)
 	document.getElementById("timeline").addEventListener("DOMNodeInserted", 
 		function (event)
 		{
-			if(event.target.nodeName == "LI" && (pb_is_in_group(event.target) == false))
+			if(event.target.nodeName == "LI" &&  (!hasClass(event.target, "animate")))
 			{
-				event.target.style.opacity = '1';
-				event.target.style.marginTop = '0px';
-				removeClass(event.target, 'animate');
-				addClass(event.target, 'pbHiddenGroup');
 				pbtweet_main([event.target]);
-			}
-			else
-			{
-				if(event.target.nodeName == "LI" &&  (!hasClass(event.target, "animate")))
-				{
-					pbtweet_main([event.target]);
-				} else if(event.target.nodeName == "LI") {
-					kick_animation_on_top(event);
-				}
+			} else if(event.target.nodeName == "LI") {
+				kick_animation_on_top(event);
 			}
 		}, false);
 }
@@ -378,11 +344,10 @@ function pbtweet_main(target)
 				}
 				var meta_url_list = entry[i].getElementsByClassName('meta')[0].getElementsByTagName('a');
 				var get_url = "";
-				
 				for( var k = 1 ; k < meta_url_list.length ; k++ )
 				{
 					// searching in_reply_to_status_id urls.
-					if( meta_url_list[k].href.match(/\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+/) )
+					if( meta_url_list[k].href.match(/^https*\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+$/) )
 						{
 							get_url = meta_url_list[k].href;
 							break;
@@ -403,7 +368,7 @@ function pbtweet_main(target)
 			}
 			catch(err)
 			{
-				//window.console.log = window.console.log + err.message + "on " + entry;
+				//window.console.log = window.console.log  + err.message + "on " + entry;
 				//document.error = entry;
 			}
 		}
@@ -533,7 +498,7 @@ function retreve_data( get_url , my_node , count )
 
 			//add reply function
 			conv_reply.getElementsByTagName('a')[0].name = conv_reply.getElementsByTagName('a')[0].href;
-			if( document.body.id.match(/home|replies|favorites|search/) )
+			if( document.body.id.match(/home|replies|favorites|search|list/) )
 			{
 				// home
 				//conv_reply.getElementsByTagName('a')[0].removeAttribute("href");
@@ -596,6 +561,7 @@ function retreve_data( get_url , my_node , count )
 		get_url = get_url.replace(/^https\:/, "http:");
 	} else if (location.href.match(/^http\:/) && get_url.match(/^http\:/)) {
 	}
+//	window.console.log += "get_url" + get_url + "\n";
 	request.open('GET', get_url, true);
 // JSON 1st!!!
 	request.setRequestHeader("Accept", "application/json, text/javascript, */*");
@@ -628,28 +594,6 @@ function remove_redundand(target_id)
 		var remove_target = document.getElementById(target_id);
 		remove_target.style.display = "none"
 		//remove_target.parentNode.removeChild(remove_target);
-	}
-}
-
-function hide_group(target_id)
-{
-	try
-	{
-		var remove_target = document.getElementById(target_id);
-		if(arguments[2])
-		{	// group on_off
-		}
-		setTimeout(function()
-		{
-			if(!hasClass(remove_target,'pbHiddenGroup'))
-			{
-				addClass(remove_target, ' pbHiddenGroup ');
-				removeClass(remove_target, 'pbHiddingGroup')
-			}
-		}, 400);
-		//remove_target.parentNode.removeChild(remove_target);
-	} catch(e) {
-		//window.console.log = window.console.log + '\n' + e + 'on removing';
 	}
 }
 
@@ -891,7 +835,15 @@ function insert_update()
 		// insert update
 		var real_timeline = document.getElementById("timeline");
 		var insert_point = real_timeline.getElementsByClassName('hentry')[0];
-		var active_timeline_url = document.getElementById('side').getElementsByClassName('active')[0].getElementsByClassName('in-page-link')[0].href;
+//		var active_timeline_url = document.getElementById('side').getElementsByClassName('active')[0].getElementsByClassName('in-page-link')[0].href;
+		if( document.getElementById('side').getElementsByClassName('active').length > 0 )
+		{
+			var active_timeline_url = document.getElementById('side').getElementsByClassName('active')[0].getElementsByTagName('a')[0].href.replace(/\#\/list\// , '');
+		}
+		else
+		{
+			var active_timeline_url = location.href.replace(/\#\/list\// , '');
+		}
 		var top_status_id = active_timeline_url + "?twttr=true";
 		var insert_point_id = insert_point.id.replace(/status_([0-9]+)/,"$1");
 			insert_point_id += 0.1;
@@ -1228,7 +1180,7 @@ function pb_link_maker(string)
 
 function pb_snip_retreiver(target)
 {
-	var snipMatch = /^(http\:\/\/tinyurl\.com\/[^\/]+|http\:\/\/bit\.ly\/[a-zA-Z0-9]+|http\:\/\/j\.mp\/[a-zA-Z0-9]+|http\:\/\/is\.gd\/.+|http\:\/\/ff\.im\/\-.+|http\:\/\/twurl\.nl\/.+)/;
+	var snipMatch = /^(http\:\/\/(www\.)*tinyurl\.com\/[^\/]+|http\:\/\/(www\.)*bit\.ly\/[a-zA-Z0-9]+|http\:\/\/(www\.)*j\.mp\/[a-zA-Z0-9]+|http\:\/\/(www\.)*is\.gd\/.+|http\:\/\/(www\.)*ff\.im\/\-.+|http\:\/\/twurl\.nl\/.+)/;
 	var links = target.getElementsByClassName('entry-content')[0].getElementsByTagName('a');
 	for(var i = 0; i < links.length; i++)
 	{
@@ -1282,9 +1234,9 @@ function pb_snip_expander( target )
 {
 	var url_alias = target.href;
 //	var snip_pattern = /http\:\/\/bit\.ly\/.+|http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
-	var snip_pattern = /http\:\/\/is\.gd\/.+|http\:\/\/twurl\.nl\/.+|http\:\/\/tinyurl\.com\/.+/;
-	var bitly_pattern = /(http\:\/\/(bit\.ly|j\.mp)\/[a-zA-Z0-9]+)[\+]?/;
-	var ffim_pattern = /http\:\/\/ff\.im\/\-.+/;
+	var snip_pattern = /http\:\/\/(www\.)*is\.gd\/.+|http\:\/\/(www\.)*twurl\.nl\/.+|http\:\/\/(www\.)*tinyurl\.com\/.+/;
+	var bitly_pattern = /(http\:\/\/(www\.)*(bit\.ly|j\.mp)\/[a-zA-Z0-9]+)[\+]?/;
+	var ffim_pattern = /http\:\/\/(www\.)*ff\.im\/\-.+/;
 	if( url_alias.match( snip_pattern ) )
 	{	//search twitter.com JSONP
 		var url_alias = url_alias;
@@ -1947,194 +1899,6 @@ Notifire.prototype =
 	} ,
 }
 
-function pb_group_tab()
-{	//create group
-	var pb_hr = document.createElement('hr');
-
-	var pb_group_wrapper = document.createElement('div');
-		pb_group_wrapper.id = 'pb-group';
-		pb_group_wrapper.className = 'collapsible';
-	var pb_group_title = document.createElement('h2');
-		pb_group_title.className = 'sidebar-title';
-		pb_group_title.innerHTML = '<span>Groups</span>';
-	var pb_group_list = document.createElement('ul');
-		pb_group_list.className = 'sidebar-menu';
-	var pb_group_add_button = document.createElement('a');
-		pb_group_add_button.className = 'xref';
-		pb_group_add_button.innerHTML = 'add';
-	pb_group_list.appendChild( pb_group_add_button );
-	pb_group_title.appendChild( pb_group_add_button );
-
-	pb_group_wrapper.appendChild(pb_group_title);
-	pb_group_wrapper.appendChild(pb_group_list);
-	pb_group_wrapper.appendChild( pb_hr );
-	pb_group_add_button.addEventListener('click', function(e){pb_add_group(e.target.parentNode);e.stopPropagation;e.preventDefault()}, false);
-	document.getElementById('side').insertBefore( pb_group_wrapper, document.getElementById('rssfeed'));
-	document.getElementById( 'following' ).appendChild( pb_hr );
-}
-
-function pb_grouping(group)
-{	//
-	if(pb_active_group != group || arguments[1] == 'keep')
-	{
-		removeClass(pb_active_group, 'pbActiveGroup');
-		pb_active_group = group;
-		var elements = document.getElementById('timeline').getElementsByClassName('hentry');
-		var group_list = group.getElementsByClassName('vcard');
-		var isInGroup = new RegExp(group.inGroup);
-		//alert(isInGroup);
-		for(var i = 0; i < elements.length; i++)
-		{
-			var target_u_name = elements[i].className.match(/u-([a-zA-Z0-9\_\-]+)/)[1];
-			if(target_u_name.match(isInGroup))
-			{
-				removeClass(elements[i], 'pbHiddenGroup');				
-			}
-			else
-			{
-				hide_group(elements[i].id, '', i * 200);
-			}
-		}
-		addClass(group, 'pbActiveGroup');
-	}
-	else
-	{
-		setTimeout(function(){pb_remove_grouping()}, 100);
-	}
-}
-
-function pb_in_group_regexp(group)
-{
-	var regrep_string = '';
-	var group_list = group.getElementsByClassName('vcard');
-	for(var j = 0; j < group_list.length; j++)
-	{
-		var g_name = group_list[j].getElementsByClassName('url')[0].href.replace(/.+twitter.com\/(.+)/, '$1');
-		regrep_string = regrep_string + '|^' + g_name + '$';
-	}
-	var return_regExp = new RegExp(regrep_string.replace(/^\|/, ''));
-	return return_regExp;
-}
-
-function pb_is_in_group(target)
-{
-	var is_in_group = true;
-	if(pb_active_group != null)
-	{
-		is_in_group = false;
-		var target_u_name = target.className.match(/u\-([a-zA-Z0-9\_\-]+)/)[1];
-		var group_list = pb_active_group.getElementsByClassName('vcard');
-		for(var j = 0; j < group_list.length; j++)
-		{
-			var g_name = group_list[j].getElementsByClassName('url')[0].href.replace(/.+twitter.com\/(.+)/, '$1');
-			if(target_u_name == g_name)
-			{
-				is_in_group = true;
-				break;
-			}
-		}
-	}
-	return(is_in_group);
-}
-
-function pb_remove_grouping()
-{
-	var group = pb_active_group;
-	removeClass(group, 'pbActiveGroup');
-	var elements = document.getElementById('timeline').getElementsByClassName('hentry');
-	for(var i = 0; i < elements.length; i++)
-	{
-		var target_id = elements[i].id;
-		setTimeout(function()
-		{
-			pb_removing_timer(target_id)
-		}, i*100);
-	}
-	pb_active_group = null;
-}
-
-function pb_removing_timer( target_id )
-{
-	var target = document.getElementById(target_id);
-		removeClass(target, 'pbHiddenGroup');
-}
-
-function pb_add_group(wrapper)
-{
-	var insert_point = wrapper;
-	var pb_group = document.createElement('li');
-		pb_group.className = 'link-title' ;
-	var pb_group_button = document.createElement('a');
-		pb_group_button.href = '#';
-		pb_group_button.innerHTML = '<span>Group</span>';
-	var pb_add_member_to_group_button = document.createElement('span');
-		pb_add_member_to_group_button.innerHTML = '+';
-		pb_add_member_to_group_button.className = 'pb-group-action';
-	pb_group_button.getElementsByTagName('span')[0].appendChild(pb_add_member_to_group_button);
-	pb_group_button.addEventListener('click', function(e){pb_grouping(pb_group);e.stopPropagation();e.preventDefault()}, false);
-	pb_add_member_to_group_button.addEventListener('click', function(e){pb_add_member_to_group_panel(pb_group);e.preventDefault();e.stopPropagation()}, true);
-	pb_group.appendChild(pb_group_button);
-	insert_point.parentNode.getElementsByClassName('sidebar-menu')[0].appendChild(pb_group);
-	pb_add_member_to_group_panel(pb_group);
-	//return pb_group;
-}
-
-function pb_add_member_to_group(target)
-{
-	var target = target;
-	var vcard_container = target.getElementsByClassName('following')[0];
-	if( !vcard_container )
-	{
-		var pb_group_vcards = document.createElement('div');
-			pb_group_vcards.className = 'following' ;
-		target.appendChild(pb_group_vcards);
-		var vcard_container = pb_group_vcards;
-	}
-
-	if( arguments[1] != '' )
-	{
-		var u_name_list = arguments[1].split(/[^0-9a-zA-Z\-\_]+/);
-		for( var i = 0 ; i < u_name_list.length ; i++ )
-		{
-			setTimeout( vcard_container.appendChild( vcard_builder( u_name_list[i] ) ) , 100 );
-		}
-		target.inGroup = pb_in_group_regexp(target);
-		//pb_grouping(target,'keep');
-	}
-	pb_add_member_panel_close(target.getElementsByClassName('pb-add-group')[0]);
-}
-
-function pb_add_member_to_group_panel(target_group)
-{
-	if(!target_group.getElementsByClassName('pb-add-group')[0])
-	{	// Group should open once.
-		var input_field_wrapper = document.createElement('div');
-			input_field_wrapper.className = 'pb-add-group';
-		var input_field = document.createElement('input');
-			input_field.className = 'uname';
-		var add_button = document.createElement('input');
-			add_button.type = 'button';
-			add_button.value = 'Add';
-		var cancel_button = document.createElement('input');
-			cancel_button.type = 'button';
-			cancel_button.value = 'Cancel';
-	
-			input_field_wrapper.appendChild(input_field);
-			input_field_wrapper.appendChild(cancel_button);
-			input_field_wrapper.appendChild(add_button);
-		
-		add_button.addEventListener('click', function(e){pb_add_member_to_group(target_group, input_field.value);e.stopPropagation()}, false);
-		cancel_button.addEventListener('click', function(e){pb_add_member_panel_close(input_field_wrapper);e.stopPropagation()}, false);
-		target_group.appendChild(input_field_wrapper); 
-	}
-}
-
-function pb_add_member_panel_close(target)
-{
-	var target = target;
-	target.parentNode.removeChild(target);
-}
-
 function vcard_builder(uname)
 {	// current, text vcard
 	var userinfo = fetch_user_info(uname);
@@ -2161,11 +1925,6 @@ function vcard_builder(uname)
 	{
 		return(null);	
 	}
-}
-
-function vcard_append( userinfo , target )
-{
-
 }
 
 function fetch_user_info(uname)
@@ -2352,16 +2111,16 @@ function pb_css_set()
 	var insert_HTML = '';
 	var get_url = '';
 	GM_addStyle(<><![CDATA[s
-		div.conv_chain {clear:both; text-align:left;margin: 5px 5px 10px 0px; padding:0px 0px 0px 0px;}
+		div.conv_chain {clear:both; text-align:left;margin: 5px 5px 4px 0px; padding:0px 0px 0px 0px;}
 		div.conv_chain div.thumb{width: 34px !important; height: 34px !important; position:relative !important;max-width:100px;}
 		div.conv_chain div.thumb img{vertical-align:top; margin-right:4px !important;width:60px !important;max-width:60px !important;height:32px !important;}
-		div.conv_chain span.icons{display:inline-block;margin-left:10px;text-align:center;padding:0px 0px 10px 0px;width:50px !important;max-width:50px !important;}
+		div.conv_chain span.icons {display:inline-block;margin-left:0px;text-align:center;padding:0px 0px 10px 0px;width:50px !important;max-width:50px !important;}
 		div.conv_chain span.icons img{max-width:40px;max-height:40px;}
 		div.conv_chain span.icons a:hover {text-underline: none;}
 		div.conv_chain span.entry-content, body#show #content div.conv_chain span.entry-content{display:block;width:400px;max-width:400px;min-height:24px;margin:0px 0px 0px 0px;padding:0px 12px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_02.png); background-repeat:repeat-y;}
 		div.conv_chain span.entry-content-before{display:block;width:400px;max-width:400px; height:12px;margin:0px 0px 0px 0px;padding:0px 6px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_01.png); background-repeat:no-repeat;}
 		div.conv_chain span.entry-content-after {display:block;width:400px;max-width:400px; height:25px;margin:0px 0px -10px 0px;padding:0px 6px 0px 16px;vertical-align:top;background-image:url(http://web.me.com/t_trace/pbtweet/images/baloon_03.png); background-repeat:no-repeat; background-position:0px -4px;}
-		div.conv_chain span.meta.entry-meta {clear:right; display:block;padding-left:24px; height:14px; margin-top:4px}
+		div.conv_chain span.meta.entry-meta {clear:right; display:block;padding-left:24px; height:10px; margin-top:4px}
 		.hentry img.twitpic_thumb {display:block;position:absolute;left:500px;top:0px;z-index:100;width:100px;heigt100px;border:7px solid white;-moz-box-shadow:0px 3px 5px rgba(0, 0, 0, 0.7);-moz-transform:scale(0.4) rotate(17deg); -moz-transform-origin:50% 0%;-moz-transition:-moz-transform 0.15s ease-in;}
 		.hentry img.twitpic_thumb:hover {z-index:101;-moz-transform:scale(1) rotate(0deg);}
 		div.conv_chain img.twitpic_thumb {position:absolute;left:435px; top:inherit;margin-top:-35px;-moz-transform-origin:50% 0%;-moz-transform:scale(0.3) rotate(17deg);}
@@ -2370,13 +2129,13 @@ function pb_css_set()
 		img.twitpic_thumb:hover {-moz-transform: translate(490px, -30px) scale(1) rotate(0deg);}
 		div.conv_chain .actions, body#show div.conv_chain .actions {display:inline; visibility: hidden;padding-top:4px ; float:right; width:14px;line-height:0.8em; position:inherit;margin-right:10px;}
 		div.conv_chain:hover .actions, body#show div.conv_chain:hover .actions {visibility: visible;}
-		div.conv_chain .actions .pb-reply {display:block;padding:4px 6px; background-position: 50% 50%; background-repeat:no-repeat; background-image: url(http://static.twitter.com/images/icon_reply.gif);}
-		div.conv_chain .actions .pb-fav-action {display:block;padding:4px 6px;background-position: 50% 50%; background-repeat:no-repeat;}
+		div.conv_chain .actions .pb-reply {display:block;padding:4px 0px 4px 17px; margin-left: -24px; background-position: 2px 2px; background-repeat:no-repeat; background-image: url(http://static.twitter.com/images/icon_reply.gif); font-size: 0.764em;}
+		div.conv_chain .actions .pb-fav-action {display:block;background-position: -32px 0px; background-repeat:no-repeat; width:15px;height:15px;}
 		span.pb-extra span {display:inline-block;box-sizing: content-box; height: 14px; font-size: 10px ;cursor:pointer; margin:0px 3px 5px 3px;padding:1px 6px;border:1px solid #cccccc; -moz-border-radius: 4px;background:#eee;}
 		li.status span.pb-extra, div.conv_chain span.pb-extra {opacity: 0;}
 		li.status:hover span.status-body span.meta span.pb-extra, div.conv_chain:hover span.pb-extra {opacity: 1;}
 		span.pb-extra span:hover {-moz-box-shadow:0px 2px 3px rgba(0, 0, 0, 0.5);color:#444;background-color:#fff;}
-		span.pb-extra {display:block;color:#ccc;position:absolute;width:190px;height:12px;margin-left:230px;margin-top:-16px; text-align:right;  font-style:normal; font-family:sans-serif;}
+		span.pb-extra {display:block;color:#ccc;position:absolute;width:190px;height:12px;margin-left:190px;margin-top:-12px; text-align:right;  font-style:normal; font-family:sans-serif;}
 		ol.statuses span.meta.entry-meta {margin-top:5px;}
 		ol.statuses li {opacity: 1}
 		#pb_info {display: inherit !important;}
@@ -2412,22 +2171,12 @@ function pb_css_set()
 		.status-body > .pb-translated {display:block; border-top:1px dotted silver; color:#555; margin-top: 4px; padding-top:4px;}
 		.entry-baloon > .pb-translated {border:none; color:#555; padding-top: 4px;}
 		.translate-loading {text-align:center;}
-		ol.statuses div.conv_chain .pb-extra {width:190px; margin-left:216px;}
+		ol.statuses div.conv_chain .pb-extra {width:190px; margin-left:200px;}
 		ol.statuses span.pb-extra .pb-trans {margin-right: 4px; height:14px;-moz-border-radius:6px 6px;}
 		ol.statuses span.pb-extra .pb-trans:hover {color: #444; border:1px solid white; background-color:rgb(99%,92%,39%); background: -moz-gradient(linear, left top, left bottom, from(#fff), to(rgb(88%,75%,19%)), color-stop(0.1, rgb(97%,94%,38%)));}
 		#profile ol.statuses li.status .status-body > .entry-meta {margin-left:63px;}
-		
-		body#profile ol.statuses .latest-status .conv_chain .entry-baloon .entry-content {font-size: 1em;}
-		
-		ul.sidebar-menu li a span.pb-group-action {float:right;width:10px;}
-		ol.statuses li.status.pbHiddingGroup {-moz-transform: scale(1, 0);}
-		ol.statuses li.status.pbHiddenGroup, ol.statuses li.status.pbInConv {display:none;}
-		.pbActiveGroup {background-color:white !important;}
-		div#pb-group span.vcard {padding : 0px 3px 2px 1px;}
-		div#pb-group li span.vcard a.url { display : inline ; background-color:transparent !important; padding: 0px;}
-		.pb-add-group input.uname {display:block; width: 157px;margin:1px 14px; padding:1px 2px;}
-		.pb-add-group {display:block; margin:1px 3px; padding-right:14px; text-align:right;}
-		div#pb-group .following { padding: 5px 10px 5px 14px; }
+
+	div#pb-group .following { padding: 5px 10px 5px 14px; }
 		.xref {margin-left:5px;}
 		
 		.conv-read-more {padding : 4px; font-size : 12px; text-align: center; font-weight:bold; color: #999; cursor:pointer; border: 1px solid #ccc; -moz-border-radius: 4px; background-color: white; background:-moz-gradient(linear, left top, left bottom, from(#fff), to(#eee), color-stop(0.1, #fff)); background-repeat : no-repeat; background-position: center;}
@@ -2439,6 +2188,8 @@ function pb_css_set()
 		.Notifire div.icon {float : left ; padding : 5px;}
 		.Notifire img.icon { width : 30px ; height 30px }
 		.Notifire div.description { margin-left : 40px ; padding : 5px ; width: 400px ; text-align : left 	; font-size: 12px ; color : white ;}
+		.status-body ul.actions-hover { position:relative; left:48px; bottom: 16px; font-size: 0.764em; margin-bottom:-16px;}
+		#profile .status-body ul.actions-hover { left:88px;}
 		]]></>);
 }
 
