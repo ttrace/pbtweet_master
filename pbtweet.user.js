@@ -1,4 +1,4 @@
-//v1.5 dev 0078
+//v1.5 dev 0079
 // ==UserScript==
 // @name      pbtweet
 // @namespace    http://t-trace.blogspot.com/
@@ -29,7 +29,7 @@ function pb_init()
 	pb_latest_update = new Date();
 
 	//information panel
-	pb_version = "v1.5 dev 0078";
+	pb_version = "v1.5 dev 0079";
 
 	//preference values
 	restore_pb_values();
@@ -241,27 +241,6 @@ function pb_init()
  				}, 1)
  			},true);
  		}
- 		var page_type = document.getElementById('side').getElementsByClassName('active')[0];
- 		switch (page_type.id)
- 		{
- 			case "home_tab":
- 				var update_target = document.getElementById('home_tab');
- 				break;
- 			case "replies_tab":
- 				var update_target = document.getElementById('replies_tab');
- 				break;
- 			case "favorites_tab":
- 				var update_target = document.getElementById('favorites_tab');
- 				break;
-  			case "profile_tab":
- 				var update_target = document.getElementById('updates_tab');
- 				break;
-  			case "update_tab":
- 				var update_target = document.getElementById('update_tab');
- 				break;
- 			default:
-  				//var update_target = document.createElement('div');
- 		}
 		pbtweet_main(document.getElementById('timeline').getElementsByClassName('hentry')); //initial
 	 } else {
 		pbtweet_main(document.getElementById('permalink').getElementsByClassName('hentry')); //initial for status page	 
@@ -359,7 +338,7 @@ function pbtweet_main(target)
 				for( var k = 1 ; k < meta_url_list.length ; k++ )
 				{
 					// searching in_reply_to_status_id urls.
-					if( meta_url_list[k].href.match(/^http\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+$/) )
+					if( meta_url_list[k].href.match(/^https*\:\/\/twitter.com\/[^\/]+\/status\/[0-9]+$/) )
 						{
 							get_url = meta_url_list[k].href;
 							break;
@@ -510,7 +489,7 @@ function retreve_data( get_url , my_node , count )
 
 			//add reply function
 			conv_reply.name = conv_reply.getElementsByTagName('a')[0].href;
-			if( document.body.id.match(/home|replies|favorites|search/) )
+			if( document.body.id.match(/home|replies|favorites|search|list/) )
 			{
 				// home
 				//conv_reply.getElementsByTagName('a')[0].removeAttribute("href");
@@ -846,7 +825,15 @@ function insert_update()
 		// insert update
 		var real_timeline = document.getElementById("timeline");
 		var insert_point = real_timeline.getElementsByClassName('hentry')[0];
-		var active_timeline_url = document.getElementById('side').getElementsByClassName('active')[0].getElementsByClassName('in-page-link')[0].href;
+//		var active_timeline_url = document.getElementById('side').getElementsByClassName('active')[0].getElementsByClassName('in-page-link')[0].href;
+		if( document.getElementById('side').getElementsByClassName('active').length > 0 )
+		{
+			var active_timeline_url = document.getElementById('side').getElementsByClassName('active')[0].getElementsByTagName('a')[0].href.replace(/\#\/list\// , '');
+		}
+		else
+		{
+			var active_timeline_url = location.href.replace(/\#\/list\// , '');
+		}
 		var top_status_id = active_timeline_url + "?twttr=true";
 		var insert_point_id = insert_point.id.replace(/status_([0-9]+)/,"$1");
 			insert_point_id += 0.1;
